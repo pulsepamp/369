@@ -786,7 +786,6 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
     <button role="tab" aria-selected="false" data-tab="burn">Burn &amp; yield</button>
     <button role="tab" aria-selected="false" data-tab="charts">Charts</button>
     <button role="tab" aria-selected="false" data-tab="liquidity">Liquidity</button>
-    <button role="tab" aria-selected="false" data-tab="stats">Stats</button>
   </nav>
 
   <div class="tab on" id="tab-auction">
@@ -1266,43 +1265,6 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
         <div class="hint" id="lpRmOut">—</div>
       </div>
       <button id="lpRmBtn" disabled>Remove liquidity</button>
-    </div>
-  </section>
-  </div>
-
-  <div class="tab" id="tab-stats">
-  <section>
-    <h2>Stats</h2>
-    <div class="panel">
-      <div class="grid">
-        <div class="cell"><span class="k"><span class="pamp-mark">$PAMP</span> minted</span><span class="v" id="sMinted">—</span><span class="note" id="sOfCap">—</span></div>
-        <div class="cell"><span class="k">Total value entered</span><span class="v" id="sRaised">—</span><span class="note" id="sMintCount">—</span></div>
-        <div class="cell"><span class="k"><span class="fuel-ico" role="img" aria-hidden="true"></span><span class="fuel-tick">$FUEL</span> burned by the $PAMP protocol</span><span class="v" id="sFuel">—</span><span class="note" id="sFuelNote">50% of every entry</span></div>
-        <div class="cell"><span class="k">To the PLS yield</span><span class="v" id="sToYield">—</span><span class="note">20% — to unclaimed and staked $PAMP</span></div>
-        <div class="cell"><span class="k">To the <span class="pamp-mark">$PAMP</span> buy and burn</span><span class="v" id="sToBurn">—</span><span class="note">30% — dripped daily</span></div>
-      </div>
-      <div style="margin-top:22px">
-        <span class="retrobar wide determinate" id="supplyBar"><i style="background-size:0% 100%"></i></span>
-      </div>
-
-      <div class="contracts">
-        <div class="contract-head">Contracts — every address below is read back from the chain and compared with what this page has hard-coded, and checked for published source.</div>
-        <div id="wiring" class="hint">Loading…</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================ past cycles ============================ -->
-  <section>
-    <h2>Past cycles</h2>
-    <div class="panel">
-      <div class="pager">
-        <button class="sm" id="cycPrev" title="Earlier day">‹</button>
-        <select id="cycDay" aria-label="Closed day"></select>
-        <button class="sm" id="cycNext" title="Later day">›</button>
-      </div>
-      <div class="grid" id="cycSummary" style="margin-bottom:22px"></div>
-      <div class="tablewrap" id="cycTable"><span class="hint">Loading…</span></div>
     </div>
   </section>
   </div>
@@ -2234,6 +2196,7 @@ async function loadCurve() {
 
 /* ---- cross-check the hard-coded addresses against the chain ---- */
 async function buildWiring() {
+  if (!$("wiring")) return;   // the Stats tab that showed this was removed
   if (!auctionDeployed()) {
     $("wiring").innerHTML = `<span class="hint">The PulseChain contracts are not deployed yet. The addresses below are the live parts they will point at.</span>` +
       [["WPLS", A.wpls], ["PulseX V2 factory", A.factory], ["Multicall3", A.multicall]]
@@ -3149,6 +3112,7 @@ function cycleEmission(d) {
   return null;
 }
 function renderCycles() {
+  if (!$("cycTable")) return;   // "Past cycles" went with the Stats tab
   const days = closedDays(), sel = $("cycDay"), sum = $("cycSummary"), box = $("cycTable");
   if (!days.length) {
     sel.innerHTML = ""; sum.innerHTML = "";
@@ -3211,9 +3175,9 @@ function renderCycles() {
     }).join("") +
     `</tbody></table><div class="hint">${cycLabel(d)} closed with ${nf(Number(total))} entries from ${nf(rows.length)} wallet${rows.length === 1 ? "" : "s"}. Rows are final: the day is over and its numbers cannot change.</div>`;
 }
-$("cycDay").addEventListener("change", e => { CYC.day = Number(e.target.value); renderCycles(); });
-$("cycPrev").addEventListener("click", () => { const days = closedDays(), i = days.indexOf(CYC.day); if (i < days.length - 1) { CYC.day = days[i + 1]; renderCycles(); } });
-$("cycNext").addEventListener("click", () => { const days = closedDays(), i = days.indexOf(CYC.day); if (i > 0) { CYC.day = days[i - 1]; renderCycles(); } });
+$("cycDay")?.addEventListener("change", e => { CYC.day = Number(e.target.value); renderCycles(); });
+$("cycPrev")?.addEventListener("click", () => { const days = closedDays(), i = days.indexOf(CYC.day); if (i < days.length - 1) { CYC.day = days[i + 1]; renderCycles(); } });
+$("cycNext")?.addEventListener("click", () => { const days = closedDays(), i = days.indexOf(CYC.day); if (i > 0) { CYC.day = days[i - 1]; renderCycles(); } });
 
 /* ---- entries per day: one bar per day, from the same scan the entrants table uses ---- */
 function renderEntriesChart() {
@@ -3406,6 +3370,7 @@ function renderYield() {
 }
 
 function renderSupply() {
+  if (!$("sMinted")) return;   // these figures lived on the removed Stats tab
   const L = S.L, K = S.K;
   const minted = L.supply ?? 0n, cap = K.maxSupply ?? 0n;
   const pct = cap > 0n ? Number((minted * 10000n) / cap) / 100 : 0;
@@ -3561,7 +3526,7 @@ wpDraw("chartCumulative", WP_CUMULATIVE, 0, 10000000);
 
 })();
 /* ---- tabs: one group of sections visible at a time; the hash remembers which ---- */
-const TABS = ["auction", "staking", "burn", "charts", "liquidity", "stats", "whitepaper"];
+const TABS = ["auction", "staking", "burn", "charts", "liquidity", "whitepaper"];
 function selectTab(name, { scroll = false } = {}) {
   if (!TABS.includes(name)) name = "auction";
   document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
