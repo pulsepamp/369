@@ -709,6 +709,21 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
     z-index: 20; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,.4); opacity: 1;
   }
   button:disabled[data-timer]:hover::after { opacity: 1; }
+  /* the entry button: half the panel's width, on the right; full width on phones */
+  #mintBtn { display: block; width: 50%; margin-left: auto; margin-right: 0; }
+  @media (max-width: 720px) { #mintBtn { width: 100%; } }
+  .buy-fuel-row { text-align: right; margin-top: 10px; }
+  .buy-fuel-row a { color: var(--accent); text-decoration: none; }
+  .buy-fuel-row a:hover { text-decoration: underline; }
+  .buy-fuel-row a.short { font-weight: 600; }
+  /* ---- liquidity tab ---- */
+  .lp-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); gap: 24px; align-items: start; }
+  .lp-cols .wide { margin-top: 14px; }
+  #swSide .pct-btn { flex: 1 1 0; padding: 10px; font-size: 14px; }
+  @media (max-width: 820px) { .lp-cols { grid-template-columns: 1fr; } }
+  /* tickers in plain text: only the title keeps the PulseChain gradient */
+  .pamp-mark, .fuel-tick { background: none; -webkit-background-clip: border-box; background-clip: border-box;
+    color: inherit; -webkit-text-fill-color: currentColor; filter: none; animation: none; font-weight: 600; }
   /* table header rows read centred, numeric columns included */
   th, th.num, #whitepaper th, #whitepaper th.num, th.sortable { text-align: center; }
   /* the recent-stakes list is centred throughout, cells included */
@@ -770,6 +785,7 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
     <button role="tab" aria-selected="false" data-tab="staking">Staking</button>
     <button role="tab" aria-selected="false" data-tab="burn">Burn &amp; yield</button>
     <button role="tab" aria-selected="false" data-tab="charts">Charts</button>
+    <button role="tab" aria-selected="false" data-tab="liquidity">Liquidity</button>
     <button role="tab" aria-selected="false" data-tab="stats">Stats</button>
   </nav>
 
@@ -782,8 +798,8 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
       <div class="field-row">
         <div class="field">
           <label for="count">How many entries (1–1000 per transaction)</label>
-          <input type="number" id="count" min="1" max="1000" step="1" value="10" inputmode="numeric">
-          <input type="range" id="slider" min="1" max="1000" step="1" value="10">
+          <input type="number" id="count" min="1" max="1000" step="1" value="50" inputmode="numeric">
+          <input type="range" id="slider" min="1" max="1000" step="1" value="50">
           <div class="pct-row" id="quick">
             <button class="pct-btn" data-q="1">1</button>
             <button class="pct-btn" data-q="10">10</button>
@@ -815,6 +831,7 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
       </div>
 
       <button id="mintBtn" class="wide" disabled>Connect wallet</button>
+      <div class="hint buy-fuel-row"><a href="#swap" id="buyFuelLink">Buy <span class="fuel-tick">$FUEL</span> with PLS →</a></div>
 
       <div class="stake-wallet" id="stakeWallet">
         <span class="addr">Not connected</span>
@@ -1117,6 +1134,140 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
   </section>
 
   <!-- ============================ supply ============================ -->
+
+
+  <!-- ============================ supply ============================ -->
+  <section>
+    <h2>Supply</h2>
+    <div class="panel">
+      <div id="supplyChart" class="hint">Loading…</div>
+      <div class="hint" id="supplyChartNote">
+        Total PAMP in existence, day by day: every closed day adds its emission, split among
+        that day's entrants. A day nobody entered adds nothing. Today's point is still filling.
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <div class="tab" id="tab-liquidity">
+  <section>
+    <h2>Pool</h2>
+    <div class="panel">
+      <div class="assetnote" id="lpNote" hidden></div>
+      <div class="grid">
+        <div class="cell"><span class="k">Price</span><span class="v" id="lpPrice">—</span><span class="note" id="lpPriceUsd">—</span></div>
+        <div class="cell"><span class="k"><span class="pamp-mark">$PAMP</span> in the pool</span><span class="v" id="lpResPamp">—</span><span class="note">PulseX V2, 0.29% fee</span></div>
+        <div class="cell"><span class="k">PLS in the pool</span><span class="v" id="lpResPls">—</span><span class="note" id="lpTvl">—</span></div>
+        <div class="cell"><span class="k">Pair</span><span class="v" id="lpPair" style="font-size:15px">—</span><span class="note">PAMP/WPLS on the PulseX V2 factory</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="swap">Swap</h2>
+    <div class="panel">
+      <div class="lp-cols">
+        <div>
+          <div class="field" style="margin-bottom:10px">
+            <label>Token</label>
+            <div class="row-btns" id="swTok">
+              <button class="pct-btn sel" data-tok="pamp"><span class="pamp-mark">$PAMP</span></button>
+              <button class="pct-btn" data-tok="fuel"><span class="fuel-ico" role="img" aria-hidden="true"></span><span class="fuel-tick">$FUEL</span></button>
+            </div>
+          </div>
+          <div class="row-btns" id="swSide" style="margin-bottom:14px">
+            <button class="pct-btn sel" data-side="buy">Buy <span class="pamp-mark">$PAMP</span></button>
+            <button class="pct-btn" data-side="sell">Sell <span class="pamp-mark">$PAMP</span></button>
+          </div>
+          <div class="field">
+            <label for="swIn" id="swInLabel">PLS to spend</label>
+            <div class="amount-wrap">
+              <input type="number" id="swIn" min="0" step="any" inputmode="decimal" placeholder="0">
+              <button class="max-btn" id="swMax" type="button">Max</button>
+            </div>
+            <div class="hint" id="swBal">—</div>
+          </div>
+          <div class="field">
+            <label>Slippage tolerance</label>
+            <div class="pct-row" id="swSlip">
+              <button class="pct-btn" data-slip="50">0.5%</button>
+              <button class="pct-btn sel" data-slip="100">1%</button>
+              <button class="pct-btn" data-slip="300">3%</button>
+              <button class="pct-btn" data-slip="500">5%</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="order-box">
+            <div class="line"><span>You receive</span><strong id="swOut">—</strong></div>
+            <div class="line"><span>Minimum after slippage</span><strong id="swMin">—</strong></div>
+            <div class="line"><span>Price impact</span><strong id="swImpact">—</strong></div>
+            <div class="line"><span>Rate</span><strong id="swRate">—</strong></div>
+            <div class="line"><span>Pool</span><strong id="swPool">—</strong></div>
+          </div>
+          <button id="swBtn" class="wide" disabled>Connect wallet</button>
+        </div>
+      </div>
+      <div class="hint" id="swHint">Trades straight against the PAMP/WPLS pair through the PulseX V2 router. The quote comes from the router itself; if the price moves past your tolerance before the transaction lands, it reverts and nothing is spent.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Add liquidity</h2>
+    <div class="panel">
+      <div class="lp-cols">
+        <div>
+          <div class="field">
+            <label for="lpPampIn"><span class="pamp-mark">$PAMP</span> to add</label>
+            <div class="amount-wrap">
+              <input type="number" id="lpPampIn" min="0" step="any" inputmode="decimal" placeholder="0">
+              <button class="max-btn" id="lpPampMax" type="button">Max</button>
+            </div>
+            <div class="hint" id="lpPampBal">—</div>
+          </div>
+          <div class="field">
+            <label for="lpPlsIn">PLS to add</label>
+            <div class="amount-wrap">
+              <input type="number" id="lpPlsIn" min="0" step="any" inputmode="decimal" placeholder="0">
+              <button class="max-btn" id="lpPlsMax" type="button">Max</button>
+            </div>
+            <div class="hint" id="lpPlsBal">—</div>
+          </div>
+        </div>
+        <div>
+          <div class="order-box">
+            <div class="line"><span>Pool share after</span><strong id="lpShare">—</strong></div>
+            <div class="line"><span>LP tokens (approx.)</span><strong id="lpMintEst">—</strong></div>
+            <div class="line"><span>Ratio</span><strong id="lpRatio">—</strong></div>
+          </div>
+          <button id="lpAddBtn" class="wide" disabled>Connect wallet</button>
+        </div>
+      </div>
+      <div class="hint" id="lpAddHint">Full-range PulseX V2 liquidity: the two amounts are kept at the pool's current ratio, so typing one fills in the other. You earn the pair's trading fee in proportion to your share, and you can withdraw at any time. First-time adds need one approval of $PAMP to the router.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Your liquidity</h2>
+    <div class="panel">
+      <div class="grid">
+        <div class="cell"><span class="k">LP tokens</span><span class="v" id="lpMine">—</span><span class="note" id="lpMineShare">—</span></div>
+        <div class="cell"><span class="k"><span class="pamp-mark">$PAMP</span> inside</span><span class="v" id="lpMinePamp">—</span></div>
+        <div class="cell"><span class="k">PLS inside</span><span class="v" id="lpMinePls">—</span><span class="note" id="lpMineUsd">—</span></div>
+      </div>
+      <div class="field" style="margin-top:18px">
+        <label>Remove</label>
+        <div class="pct-row" id="lpRmPct">
+          <button class="pct-btn" data-rm="25">25%</button>
+          <button class="pct-btn sel" data-rm="50">50%</button>
+          <button class="pct-btn" data-rm="75">75%</button>
+          <button class="pct-btn" data-rm="100">100%</button>
+        </div>
+        <div class="hint" id="lpRmOut">—</div>
+      </div>
+      <button id="lpRmBtn" disabled>Remove liquidity</button>
+    </div>
+  </section>
   </div>
 
   <div class="tab" id="tab-stats">
@@ -1137,18 +1288,6 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
       <div class="contracts">
         <div class="contract-head">Contracts — every address below is read back from the chain and compared with what this page has hard-coded, and checked for published source.</div>
         <div id="wiring" class="hint">Loading…</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================ supply ============================ -->
-  <section>
-    <h2>Supply</h2>
-    <div class="panel">
-      <div id="supplyChart" class="hint">Loading…</div>
-      <div class="hint" id="supplyChartNote">
-        Total PAMP in existence, day by day: every closed day adds its emission, split among
-        that day's entrants. A day nobody entered adds nothing. Today's point is still filling.
       </div>
     </div>
   </section>
@@ -1490,19 +1629,19 @@ const CHAIN = {
    once PulseChain $FUEL exists; until then they are zero and the page shows the launch
    notice. WPLS, the PulseX V2 factory and Multicall3 are live already. */
 const A = {
-  token:      "0x0000000000000000000000000000000000000000",
-  auction:    "0x0000000000000000000000000000000000000000",
-  staking:    "0x0000000000000000000000000000000000000000",
-  yield:      "0x0000000000000000000000000000000000000000",
-  buyAndBurn: "0x0000000000000000000000000000000000000000",
-  schedule:   "0x0000000000000000000000000000000000000000",
-  fuel:       "0x0000000000000000000000000000000000000000",
-  fuelPair:   "0x0000000000000000000000000000000000000000",
+  token:      "0xd5E952eA1B17034Ad3368805ed9CFB08009deA79",
+  auction:    "0x0cb79f2123DA9fba7Ee8Fcad12206c959525Eb72",
+  staking:    "0x008d3398E3b477d5D026B9013D0aC419b14176d3",
+  yield:      "0xaa479777fECDAb3DcB85FaB803441CcDCb6784f5",
+  buyAndBurn: "0x803A214eb503b2202708Fc4743CB88ea759f4903",
+  schedule:   "0x08347994245F968e2b8c9D516a1ee6A3A6a32c05",
+  fuel:       "0x6633aeDbB64115391238D7ce56D2DFAa2e0c7b45",
+  fuelPair:   "0x0bB20331f424e59612668f3294A23CAa83CC06ef",
   wpls:       "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
   factory:    "0x29eA7545DEf87022BAdc76323F373EA1e707C523",
   multicall:  "0xcA11bde05977b3631167028862bE2a173976CA11",
   // the auction's deployment block: the event scans start here. 0 means not deployed.
-  auctionDeployBlock: 0,
+  auctionDeployBlock: 27670648,
   genesisDefault: 0
 };
 const DEAD = "0x000000000000000000000000000000000000dEaD";
@@ -1569,7 +1708,6 @@ const ABI = {
     "function totalClaimed() view returns (uint256)",
     "function totalPlsYieldPaid() view returns (uint256)",
     "function devDayMinted() view returns (uint256)",
-    "function mintDevDay() returns (uint256)",
     "event DevDayMinted(address indexed devWallet, uint256 amount)",
     "function unclaimedSupply() view returns (uint256)",
     "function settledThrough() view returns (uint256)",
@@ -1960,7 +2098,7 @@ async function loadConstants() {
   const c = $("count"), sl = $("slider");
   c.min = sl.min = K.minMints; c.max = sl.max = K.maxMints;
   $("bbHint").textContent = `Anyone can run the burn and keep ${(K.incentive / 100).toFixed(1)}% of the interval's PLS.`;
-  $("eyebrow").textContent = `PulseChain · ${K.totalDays} daily auctions · ${fmtTok(K.entryValue)} PLS of value per entry`;
+  renderEyebrow();
   syncCount();
 }
 
@@ -2159,7 +2297,16 @@ async function verifySources(addrs) {
 /* ===================================================================
    Rendering
    =================================================================== */
+/* The line under the title: the auction's shape plus the live PLS price. */
+function renderEyebrow() {
+  const K = S.K;
+  const base = K.totalDays ? `PulseChain · ${K.totalDays} daily auctions · ${fmtTok(K.entryValue)} PLS of value per entry` : "PulseChain · 1000 daily auctions · 25,000 PLS of value per entry";
+  const px = fmtPrice(S.usd.pls, "$");
+  $("eyebrow").textContent = base + (px ? ` · PLS ${px}` : "");
+}
+
 function renderHeader() {
+  renderEyebrow();
   const L = S.L, b = L.bbBurnt;
   const px = pampUsd();
   const bUsd = b && b > 0n ? fmtUsd(usdOf(b, px.price)) : null;
@@ -3414,7 +3561,7 @@ wpDraw("chartCumulative", WP_CUMULATIVE, 0, 10000000);
 
 })();
 /* ---- tabs: one group of sections visible at a time; the hash remembers which ---- */
-const TABS = ["auction", "staking", "burn", "charts", "stats", "whitepaper"];
+const TABS = ["auction", "staking", "burn", "charts", "liquidity", "stats", "whitepaper"];
 function selectTab(name, { scroll = false } = {}) {
   if (!TABS.includes(name)) name = "auction";
   document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
@@ -3536,6 +3683,13 @@ function syncCount() {
   else if (W && W.fuelBal < fuelNeed) { btn.disabled = true; btn.textContent = `Not enough $FUEL (need ${fmtTok(fuelNeed, 0)})`; }
   else if (W && W.fuelAllow < fuelCap(fuelNeed)) { btn.disabled = false; btn.textContent = "Approve $FUEL (once)"; }
   else { btn.disabled = false; btn.textContent = `Enter ${label} for ${fmtPls(plsCost)} + ${fmtTok(fuelNeed, 0)} $FUEL`; }
+  // the "buy FUEL" link under the button names the shortfall when there is one
+  S.fuelShort = W && fuelNeed !== null && W.fuelBal < fuelNeed ? fuelNeed - W.fuelBal : 0n;
+  const bfl = $("buyFuelLink");
+  bfl.classList.toggle("short", S.fuelShort > 0n);
+  bfl.innerHTML = S.fuelShort > 0n
+    ? `You need ${fmtTok(S.fuelShort, 0)} more <span class="fuel-tick">$FUEL</span>: buy it with PLS →`
+    : `Buy <span class="fuel-tick">$FUEL</span> with PLS →`;
 }
 /* Which of the two pool averages is being charged, and the contract's own price log. */
 /* Which of the two prices is being charged, and the contract's own price log. */
@@ -3643,6 +3797,7 @@ async function connect() {
     $("connect").disabled = true;
     await loadWallet();
     syncCount(); renderBurner(); renderMinters(); syncStakeForm(); renderStakes();
+    if ($("tab-liquidity").classList.contains("on")) lpRefresh().catch(() => {});
     toast("Connected as " + short(S.account));
   } catch (e) { toast(explainError(e), "err"); }
 }
@@ -3739,6 +3894,308 @@ $("bbBurnBtn").onclick = async () => {
   const ok = await withTx(btn, "Burn", () => c.swapPlsForPampAndBurn(deadline));
   if (ok) { S.burns = null; scanBurner().then(renderBurner).catch(() => {}); }
 };
+
+/* ===================================================================
+   Liquidity: the PAMP/WPLS pair on PulseX V2 -- pool figures, a swap box,
+   full-range add and remove. Everything goes through the V2 router.
+   =================================================================== */
+const LP = {
+  router: "0x165C3410fC91EF562C50559f7d2289fEbed552d9",
+  FEE_NUM: 9971n, FEE_DEN: 10000n,
+  side: "buy", slipBps: 100n, rmPct: 50, pair: null, w0: true, r: null, supply: 0n,
+  mine: 0n, pampBal: 0n, pampAllow: 0n, lpAllow: 0n, busy: false, last: "pamp",
+  // the swap box trades PAMP or FUEL against PLS; FUEL goes through the auction's own FUEL/WPLS pair
+  tok: "pamp", fuel: { r: null, w0: true, bal: 0n, allow: 0n }
+};
+const LP_ABI = {
+  router: [
+    "function getAmountsOut(uint256 amountIn, address[] path) view returns (uint256[] amounts)",
+    "function swapExactETHForTokens(uint256 amountOutMin, address[] path, address to, uint256 deadline) payable returns (uint256[] amounts)",
+    "function swapExactTokensForETH(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256[] amounts)",
+    "function getAmountsIn(uint256 amountOut, address[] path) view returns (uint256[] amounts)",
+    "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint256 amountOutMin, address[] path, address to, uint256 deadline) payable",
+    "function swapExactTokensForETHSupportingFeeOnTransferTokens(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline)",
+    "function addLiquidityETH(address token, uint256 amountTokenDesired, uint256 amountTokenMin, uint256 amountETHMin, address to, uint256 deadline) payable returns (uint256 amountToken, uint256 amountETH, uint256 liquidity)",
+    "function removeLiquidityETH(address token, uint256 liquidity, uint256 amountTokenMin, uint256 amountETHMin, address to, uint256 deadline) returns (uint256 amountToken, uint256 amountETH)"
+  ],
+  factory: ["function getPair(address, address) view returns (address)"],
+  pair: [
+    "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+    "function token0() view returns (address)",
+    "function totalSupply() view returns (uint256)",
+    "function balanceOf(address) view returns (uint256)",
+    "function allowance(address, address) view returns (uint256)",
+    "function approve(address, uint256) returns (bool)"
+  ]
+};
+const LPI = { router: new E.Interface(LP_ABI.router), factory: new E.Interface(LP_ABI.factory), pair: new E.Interface(LP_ABI.pair) };
+const lpUnits = v => { try { return E.parseEther(String(v || "").trim() || "0"); } catch { return 0n; } };
+const lpDeadline = () => BigInt(nowTs() + 1200);
+/* a wei amount written back into an input: at most 6 decimals, no trailing zeros */
+const lpIn = wei => { const t = E.formatEther(wei); const [w, f = ""] = t.split("."); const d = f.slice(0, 6).replace(/0+$/, ""); return d ? `${w}.${d}` : w; };
+const lpFmt = (wei, d = 4) => (wei === null || wei === undefined) ? "—" : nf(Number(E.formatEther(wei)), d);
+/* reserves as (PAMP, WPLS) whatever the pair's token order */
+const lpRes = () => LP.r ? (LP.w0 ? { pamp: LP.r[1], pls: LP.r[0] } : { pamp: LP.r[0], pls: LP.r[1] }) : null;
+/* the token the swap box is trading: its address, name, pool and the wallet's balance and approval */
+function swTok() {
+  if (LP.tok === "fuel") {
+    const f = LP.fuel, res = f.r ? (f.w0 ? { tok: f.r[1], pls: f.r[0] } : { tok: f.r[0], pls: f.r[1] }) : null;
+    return { key: "fuel", addr: A.fuel, sym: "FUEL", mark: `<span class="fuel-tick">$FUEL</span>`, pair: A.fuelPair,
+             pairName: "FUEL/WPLS", res, bal: f.bal, allow: f.allow, feeSafe: true };
+  }
+  const r = lpRes();
+  return { key: "pamp", addr: A.token, sym: "PAMP", mark: `<span class="pamp-mark">$PAMP</span>`, pair: LP.pair,
+           pairName: "PAMP/WPLS", res: r ? { tok: r.pamp, pls: r.pls } : null, bal: LP.pampBal, allow: LP.pampAllow, feeSafe: false };
+}
+
+async function lpRefresh() {
+  const note = $("lpNote");
+  if (A.token.toLowerCase() === ZERO) {
+    note.hidden = false; note.innerHTML = `The token is not deployed yet. The pool, swap and liquidity tools switch on once it is, and the PAMP/WPLS pair has been seeded.`;
+    ["swBtn", "lpAddBtn", "lpRmBtn"].forEach(id => { $(id).disabled = true; });
+    $("swBtn").textContent = $("lpAddBtn").textContent = "Not deployed yet";
+    return;
+  }
+  const r0 = await mc([call(A.factory, LPI.factory, "getPair", [A.wpls, A.token])]);
+  const pair = dec(LPI.factory, "getPair", r0[0]);
+  LP.pair = pair && pair !== ZERO ? pair : null;
+  const calls = [];
+  if (LP.pair) calls.push(call(LP.pair, LPI.pair, "getReserves"), call(LP.pair, LPI.pair, "token0"), call(LP.pair, LPI.pair, "totalSupply"));
+  if (S.account) {
+    calls.push(call(A.token, I.erc20, "balanceOf", [S.account]), call(A.token, I.erc20, "allowance", [S.account, LP.router]));
+    if (LP.pair) calls.push(call(LP.pair, LPI.pair, "balanceOf", [S.account]), call(LP.pair, LPI.pair, "allowance", [S.account, LP.router]));
+  }
+  // the FUEL side of the swap box, read after the PAMP calls so their order stays as it was
+  const fuelCalls = [call(A.fuelPair, LPI.pair, "getReserves"), call(A.fuelPair, LPI.pair, "token0")];
+  if (S.account) fuelCalls.push(call(A.fuel, I.erc20, "balanceOf", [S.account]), call(A.fuel, I.erc20, "allowance", [S.account, LP.router]));
+  const nPamp = calls.length;
+  const r = await mc(calls.concat(fuelCalls)); let i = 0;
+  {
+    let j = nPamp; const f = LP.fuel;
+    const fr = dec(LPI.pair, "getReserves", r[j++]); f.r = fr ? [fr[0], fr[1]] : null;
+    f.w0 = String(dec(LPI.pair, "token0", r[j++]) || "").toLowerCase() === A.wpls.toLowerCase();
+    if (S.account) { f.bal = dec(I.erc20, "balanceOf", r[j++]) ?? 0n; f.allow = dec(I.erc20, "allowance", r[j++]) ?? 0n; }
+    else { f.bal = 0n; f.allow = 0n; }
+  }
+  if (LP.pair) {
+    const res = dec(LPI.pair, "getReserves", r[i++]); LP.r = res ? [res[0], res[1]] : null;
+    LP.w0 = String(dec(LPI.pair, "token0", r[i++]) || "").toLowerCase() === A.wpls.toLowerCase();
+    LP.supply = dec(LPI.pair, "totalSupply", r[i++]) ?? 0n;
+  } else { LP.r = null; LP.supply = 0n; }
+  if (S.account) {
+    LP.pampBal = dec(I.erc20, "balanceOf", r[i++]) ?? 0n; LP.pampAllow = dec(I.erc20, "allowance", r[i++]) ?? 0n;
+    if (LP.pair) { LP.mine = dec(LPI.pair, "balanceOf", r[i++]) ?? 0n; LP.lpAllow = dec(LPI.pair, "allowance", r[i++]) ?? 0n; } else { LP.mine = 0n; LP.lpAllow = 0n; }
+    try { S.plsBal = await rpcRetry(p => p.getBalance(S.account)); } catch {}
+  }
+  lpRender();
+  lpQuote().catch(() => {});
+}
+
+function lpRender() {
+  const res = lpRes(), note = $("lpNote");
+  const empty = !res || res.pamp === 0n || res.pls === 0n;
+  if (!LP.pair) { note.hidden = false; note.innerHTML = `There is no PAMP/WPLS pair on PulseX V2 yet. The first liquidity added below creates it and sets the starting price, so choose both amounts deliberately.`; }
+  else if (empty) { note.hidden = false; note.innerHTML = `The PAMP/WPLS pair exists but is empty. The first liquidity added below sets the starting price.`; }
+  else note.hidden = true;
+  const price = !empty ? Number(E.formatEther(res.pls)) / Number(E.formatEther(res.pamp)) : null;
+  $("lpPrice").textContent = price !== null ? `${fmtPrice(price, "PLS")} per PAMP` : "—";
+  $("lpPriceUsd").textContent = price !== null && S.usd.pls ? `≈ ${fmtPrice(price * S.usd.pls, "$")}` : "—";
+  $("lpResPamp").textContent = res ? lpFmt(res.pamp, 0) : "—";
+  $("lpResPls").textContent = res ? fmtPls(res.pls) : "—";
+  $("lpTvl").textContent = res && S.usd.pls ? `pool ≈ ${fmtUsd(2 * Number(E.formatEther(res.pls)) * S.usd.pls)}` : "—";
+  $("lpPair").innerHTML = LP.pair ? linkAddr(LP.pair) : "not created yet";
+  // wallet lines
+  $("lpPampBal").textContent = S.account ? `Wallet: ${lpFmt(LP.pampBal, 2)} PAMP` : "Connect a wallet to see your balance.";
+  $("lpPlsBal").textContent = S.account ? `Wallet: ${fmtPls(S.plsBal, 2)}` : "—";
+  // your position
+  const share = LP.supply > 0n ? Number((LP.mine * 1000000n) / LP.supply) / 10000 : 0;
+  $("lpMine").textContent = S.account ? lpFmt(LP.mine, 6) : "—";
+  $("lpMineShare").textContent = S.account && LP.mine > 0n ? `${share.toFixed(4)}% of the pool` : (S.account ? "no position" : "connect a wallet");
+  const minePamp = res && LP.supply > 0n ? (res.pamp * LP.mine) / LP.supply : 0n, minePls = res && LP.supply > 0n ? (res.pls * LP.mine) / LP.supply : 0n;
+  $("lpMinePamp").textContent = S.account ? lpFmt(minePamp, 2) : "—";
+  $("lpMinePls").textContent = S.account ? fmtPls(minePls, 2) : "—";
+  $("lpMineUsd").textContent = S.account && minePls > 0n && S.usd.pls ? `position ≈ ${fmtUsd(2 * Number(E.formatEther(minePls)) * S.usd.pls)}` : "—";
+  const rm = (LP.mine * BigInt(LP.rmPct)) / 100n;
+  $("lpRmOut").textContent = S.account && LP.mine > 0n ? `Returns about ${lpFmt((minePamp * BigInt(LP.rmPct)) / 100n, 2)} PAMP and ${fmtPls((minePls * BigInt(LP.rmPct)) / 100n, 2)}` : "—";
+  const rmBtn = $("lpRmBtn");
+  if (!S.signer) { rmBtn.disabled = true; rmBtn.textContent = "Remove liquidity"; }
+  else if (LP.mine <= 0n) { rmBtn.disabled = true; rmBtn.textContent = "No liquidity to remove"; }
+  else { rmBtn.disabled = false; rmBtn.textContent = LP.lpAllow < rm ? "Approve LP tokens" : `Remove ${LP.rmPct}%`; }
+  lpSyncAdd();
+}
+
+/* ---- swap ---- */
+/* labels that follow the selected token */
+function swSyncTok() {
+  const t = swTok();
+  document.querySelectorAll("#swTok .pct-btn").forEach(x => x.classList.toggle("sel", x.dataset.tok === t.key));
+  document.querySelectorAll("#swSide .pct-btn").forEach(x => { x.innerHTML = `${x.dataset.side === "buy" ? "Buy" : "Sell"} ${t.mark}`; });
+  $("swPool").innerHTML = t.pair && t.pair !== ZERO ? `${t.pairName} · ${linkAddr(t.pair)}` : "—";
+  $("swHint").innerHTML = t.key === "fuel"
+    ? `Trades straight against the FUEL/WPLS pair on PulseX V2, the same pair the auction prices $FUEL from, through the PulseX V2 router. The quote comes from the router itself; if the price moves past your tolerance before the transaction lands, it reverts and nothing is spent. Selling $FUEL needs one approval to the router first.`
+    : `Trades straight against the PAMP/WPLS pair through the PulseX V2 router. The quote comes from the router itself; if the price moves past your tolerance before the transaction lands, it reverts and nothing is spent.`;
+}
+
+async function lpQuote() {
+  const inAmt = lpUnits($("swIn").value), t = swTok(), res = t.res, btn = $("swBtn");
+  const buy = LP.side === "buy";
+  swSyncTok();
+  $("swInLabel").textContent = buy ? "PLS to spend" : `${t.sym} to sell`;
+  $("swBal").textContent = S.account ? (buy ? `Wallet: ${fmtPls(S.plsBal, 2)}` : `Wallet: ${lpFmt(t.bal, 2)} ${t.sym}`) : "Connect a wallet to see your balance.";
+  const clear = m => { ["swOut", "swMin", "swImpact", "swRate"].forEach(id => $(id).textContent = "—"); btn.disabled = !!S.signer; btn.textContent = S.signer ? m : "Connect wallet"; LP.q = null; };
+  if (!res || res.tok === 0n || res.pls === 0n) return clear("No liquidity yet");
+  if (inAmt <= 0n) return clear("Enter an amount");
+  const path = buy ? [A.wpls, t.addr] : [t.addr, A.wpls];
+  const r = await mc([call(LP.router, LPI.router, "getAmountsOut", [inAmt, path])]);
+  const amounts = dec(LPI.router, "getAmountsOut", r[0]);
+  if (!amounts) return clear("No quote");
+  const out = amounts[amounts.length - 1], minOut = (out * (10000n - LP.slipBps)) / 10000n;
+  const [rIn, rOut] = buy ? [res.pls, res.tok] : [res.tok, res.pls];
+  const spotOut = (inAmt * rOut) / rIn;                        // what the same input buys at the pool's current price, before fee and impact
+  const impact = spotOut > 0n ? Number(((spotOut - out) * 1000000n) / spotOut) / 10000 : 0;
+  LP.q = { inAmt, out, minOut, path, buy, tok: t };
+  $("swOut").textContent = buy ? `${lpFmt(out, 2)} ${t.sym}` : fmtPls(out, 2);
+  $("swMin").textContent = buy ? `${lpFmt(minOut, 2)} ${t.sym}` : fmtPls(minOut, 2);
+  $("swImpact").innerHTML = `<span class="${impact > 5 ? "bad" : impact > 2 ? "warn" : ""}">${impact.toFixed(2)}%</span> <span class="muted">incl. 0.29% fee</span>`;
+  const rate = Number(E.formatEther(out)) / Number(E.formatEther(inAmt));
+  $("swRate").textContent = buy ? `1 PLS = ${fmtPrice(rate, t.sym)}` : `1 ${t.sym} = ${fmtPrice(rate, "PLS")}`;
+  if (!S.signer) { btn.disabled = false; btn.textContent = "Connect wallet"; }
+  else if (buy && S.plsBal !== undefined && S.plsBal < inAmt) { btn.disabled = true; btn.textContent = "Not enough PLS"; }
+  else if (!buy && t.bal < inAmt) { btn.disabled = true; btn.textContent = `Not enough ${t.sym}`; }
+  else if (!buy && t.allow < inAmt) { btn.disabled = false; btn.textContent = `Approve ${t.sym}`; }
+  else { btn.disabled = false; btn.textContent = buy ? `Buy ${lpFmt(out, 2)} ${t.sym}` : `Sell for ${fmtPls(out, 2)}`; }
+}
+let lpQuoteTimer = null;
+const lpQuoteSoon = () => { clearTimeout(lpQuoteTimer); lpQuoteTimer = setTimeout(() => lpQuote().catch(() => {}), 250); };
+$("swIn").addEventListener("input", lpQuoteSoon);
+document.querySelectorAll("#swSide .pct-btn").forEach(b => b.onclick = () => {
+  LP.side = b.dataset.side; document.querySelectorAll("#swSide .pct-btn").forEach(x => x.classList.toggle("sel", x === b)); $("swIn").value = ""; lpQuoteSoon();
+});
+document.querySelectorAll("#swTok .pct-btn").forEach(b => b.onclick = () => {
+  if (LP.tok === b.dataset.tok) return;
+  LP.tok = b.dataset.tok; $("swIn").value = ""; lpQuoteSoon();
+});
+document.querySelectorAll("#swSlip .pct-btn").forEach(b => b.onclick = () => {
+  LP.slipBps = BigInt(b.dataset.slip); document.querySelectorAll("#swSlip .pct-btn").forEach(x => x.classList.toggle("sel", x === b)); lpQuoteSoon();
+});
+$("swMax").onclick = () => {
+  if (!S.account) return toast("Connect a wallet first.", "err");
+  // leave a little PLS for gas when buying
+  const v = LP.side === "buy" ? (S.plsBal > E.parseEther("2000") ? S.plsBal - E.parseEther("2000") : 0n) : swTok().bal;
+  $("swIn").value = E.formatEther(v); lpQuoteSoon();
+};
+$("swBtn").onclick = async () => {
+  if (!S.signer) return connect();
+  const q = LP.q; if (!q) return;
+  const t = q.tok, router = new E.Contract(LP.router, LP_ABI.router, S.signer);
+  if (!q.buy && t.allow < q.inAmt) {
+    const c = new E.Contract(t.addr, ABI.erc20, S.signer);
+    await withTx($("swBtn"), `Approval of ${t.sym} for PulseX`, () => c.approve(LP.router, E.MaxUint256));
+    await lpRefresh(); return;
+  }
+  // $FUEL is not our contract, so its trades use the router's fee-on-transfer-safe variants
+  const ok = await withTx($("swBtn"), q.buy ? `Buy of ${t.sym}` : `Sale of ${t.sym}`, () => q.buy
+    ? (t.feeSafe ? router.swapExactETHForTokensSupportingFeeOnTransferTokens(q.minOut, q.path, S.account, lpDeadline(), { value: q.inAmt })
+                 : router.swapExactETHForTokens(q.minOut, q.path, S.account, lpDeadline(), { value: q.inAmt }))
+    : (t.feeSafe ? router.swapExactTokensForETHSupportingFeeOnTransferTokens(q.inAmt, q.minOut, q.path, S.account, lpDeadline())
+                 : router.swapExactTokensForETH(q.inAmt, q.minOut, q.path, S.account, lpDeadline())));
+  if (ok) $("swIn").value = "";
+  await lpRefresh();
+  // a FUEL buy changes what the entry form can afford
+  if (ok && t.key === "fuel") loadWallet().then(syncCount).catch(() => {});
+};
+
+/* "Buy $FUEL" from the entry form: open the swap on FUEL, sized to the shortfall when there is one */
+$("buyFuelLink").onclick = async e => {
+  e.preventDefault();
+  LP.tok = "fuel"; LP.side = "buy";
+  document.querySelectorAll("#swSide .pct-btn").forEach(x => x.classList.toggle("sel", x.dataset.side === "buy"));
+  selectTab("liquidity");
+  $("swap").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("swIn").value = "";
+  try {
+    await lpRefresh();
+    if (S.fuelShort > 0n) {
+      // PLS for the missing FUEL, plus 2% so the slippage floor still covers it
+      const want = (S.fuelShort * 102n) / 100n;
+      const r = await mc([call(LP.router, LPI.router, "getAmountsIn", [want, [A.wpls, A.fuel]])]);
+      const amts = dec(LPI.router, "getAmountsIn", r[0]);
+      if (amts) { $("swIn").value = lpIn(amts[0]); await lpQuote(); }
+    }
+  } catch (err) { console.warn("[buy fuel]", err); }
+  $("swIn").focus({ preventScroll: true });
+};
+
+/* ---- add liquidity: amounts held at the pool ratio ---- */
+function lpSyncAdd() {
+  const res = lpRes(), empty = !res || res.pamp === 0n || res.pls === 0n;
+  const pamp = lpUnits($("lpPampIn").value), pls = lpUnits($("lpPlsIn").value);
+  if (!empty) {
+    if (LP.last === "pamp" && pamp > 0n) $("lpPlsIn").value = lpIn((pamp * res.pls) / res.pamp);
+    if (LP.last === "pls" && pls > 0n) $("lpPampIn").value = lpIn((pls * res.pamp) / res.pls);
+  }
+  const a = lpUnits($("lpPampIn").value), b = lpUnits($("lpPlsIn").value);
+  $("lpRatio").textContent = a > 0n && b > 0n ? `${fmtPrice(Number(E.formatEther(b)) / Number(E.formatEther(a)), "PLS")} per PAMP${empty ? " (sets the price)" : ""}` : "—";
+  let mint = null;
+  if (a > 0n && b > 0n) {
+    if (empty || LP.supply === 0n) { const sq = BigInt(Math.floor(Math.sqrt(Number(E.formatEther(a)) * Number(E.formatEther(b))) * 1e6)) * 10n ** 12n; mint = sq; }
+    else { const m1 = (a * LP.supply) / res.pamp, m2 = (b * LP.supply) / res.pls; mint = m1 < m2 ? m1 : m2; }
+  }
+  $("lpMintEst").textContent = mint !== null ? lpFmt(mint, 6) : "—";
+  const shareAfter = mint !== null ? (LP.supply + mint > 0n ? Number(((LP.mine + mint) * 1000000n) / (LP.supply + mint)) / 10000 : 100) : null;
+  $("lpShare").textContent = shareAfter !== null ? `${shareAfter.toFixed(4)}%` : "—";
+  const btn = $("lpAddBtn");
+  if (!S.signer) { btn.disabled = false; btn.textContent = "Connect wallet"; }
+  else if (a <= 0n || b <= 0n) { btn.disabled = true; btn.textContent = "Enter amounts"; }
+  else if (LP.pampBal < a) { btn.disabled = true; btn.textContent = "Not enough PAMP"; }
+  else if (S.plsBal !== undefined && S.plsBal < b) { btn.disabled = true; btn.textContent = "Not enough PLS"; }
+  else if (LP.pampAllow < a) { btn.disabled = false; btn.textContent = "Approve PAMP"; }
+  else { btn.disabled = false; btn.textContent = empty ? "Create the pool and add liquidity" : "Add liquidity"; }
+}
+$("lpPampIn").addEventListener("input", () => { LP.last = "pamp"; lpSyncAdd(); });
+$("lpPlsIn").addEventListener("input", () => { LP.last = "pls"; lpSyncAdd(); });
+$("lpPampMax").onclick = () => { if (!S.account) return toast("Connect a wallet first.", "err"); LP.last = "pamp"; $("lpPampIn").value = E.formatEther(LP.pampBal); lpSyncAdd(); };
+$("lpPlsMax").onclick = () => { if (!S.account) return toast("Connect a wallet first.", "err"); LP.last = "pls"; const v = S.plsBal > E.parseEther("2000") ? S.plsBal - E.parseEther("2000") : 0n; $("lpPlsIn").value = E.formatEther(v); lpSyncAdd(); };
+$("lpAddBtn").onclick = async () => {
+  if (!S.signer) return connect();
+  const a = lpUnits($("lpPampIn").value), b = lpUnits($("lpPlsIn").value);
+  if (a <= 0n || b <= 0n) return;
+  if (LP.pampAllow < a) {
+    const t = new E.Contract(A.token, ABI.erc20, S.signer);
+    await withTx($("lpAddBtn"), "Approval of PAMP for PulseX", () => t.approve(LP.router, E.MaxUint256));
+    await lpRefresh(); return;
+  }
+  const res = lpRes(), empty = !res || res.pamp === 0n || res.pls === 0n;
+  // an empty pool takes the amounts as given; an existing one may shift a little between typing and landing
+  const minA = empty ? a : (a * 99n) / 100n, minB = empty ? b : (b * 99n) / 100n;
+  const router = new E.Contract(LP.router, LP_ABI.router, S.signer);
+  const ok = await withTx($("lpAddBtn"), "Add liquidity", () => router.addLiquidityETH(A.token, a, minA, minB, S.account, lpDeadline(), { value: b }));
+  if (ok) { $("lpPampIn").value = ""; $("lpPlsIn").value = ""; }
+  await lpRefresh();
+};
+
+/* ---- remove ---- */
+document.querySelectorAll("#lpRmPct .pct-btn").forEach(b => b.onclick = () => {
+  LP.rmPct = Number(b.dataset.rm); document.querySelectorAll("#lpRmPct .pct-btn").forEach(x => x.classList.toggle("sel", x === b)); lpRender();
+});
+$("lpRmBtn").onclick = async () => {
+  if (!S.signer) return connect();
+  const liq = (LP.mine * BigInt(LP.rmPct)) / 100n; if (liq <= 0n) return;
+  if (LP.lpAllow < liq) {
+    const pr = new E.Contract(LP.pair, LP_ABI.pair, S.signer);
+    await withTx($("lpRmBtn"), "Approval of LP tokens", () => pr.approve(LP.router, E.MaxUint256));
+    await lpRefresh(); return;
+  }
+  const res = lpRes();
+  const minA = ((res.pamp * liq) / LP.supply) * 99n / 100n, minB = ((res.pls * liq) / LP.supply) * 99n / 100n;
+  const router = new E.Contract(LP.router, LP_ABI.router, S.signer);
+  await withTx($("lpRmBtn"), `Removal of ${LP.rmPct}% of your liquidity`, () => router.removeLiquidityETH(A.token, liq, minA, minB, S.account, lpDeadline()));
+  await lpRefresh();
+};
+
+/* refresh when the tab is opened, and every 30 s while it is showing */
+document.querySelector('nav.tabs button[data-tab="liquidity"]').addEventListener("click", () => lpRefresh().catch(e => console.warn("[lp]", e)));
+setInterval(() => { if ($("tab-liquidity").classList.contains("on")) lpRefresh().catch(() => {}); }, 30000);
 
 boot();
 </script>
