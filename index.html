@@ -969,7 +969,7 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
     <button role="tab" aria-selected="false" data-tab="staking">Staking</button>
     <button role="tab" aria-selected="false" data-tab="burn">Buy &amp; burn</button>
     <button role="tab" aria-selected="false" data-tab="charts">Charts</button>
-    <button role="tab" aria-selected="false" data-tab="liquidity">Liquidity</button>
+    <button role="tab" aria-selected="false" data-tab="liquidity">Swap</button>
     <button role="tab" aria-selected="false" data-tab="fuel">FUEL</button>
   </nav>
 
@@ -1308,22 +1308,23 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
       </div>
     </div>
   </section>
+
+  <!-- ============================ past cycles ============================ -->
+  <section>
+    <h2>Past cycles</h2>
+    <div class="panel">
+      <div class="pager">
+        <button class="sm" id="cycPrev" title="Earlier day">‹</button>
+        <select id="cycDay" aria-label="Closed day"></select>
+        <button class="sm" id="cycNext" title="Later day">›</button>
+      </div>
+      <div class="grid" id="cycSummary" style="margin-bottom:22px"></div>
+      <div class="tablewrap" id="cycTable"><span class="w95" data-est="Loading past days" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="w95-label">Loading past days…</span><span class="w95-row"><span class="w95-bar"><span class="w95-fill" style="--p:0%"></span></span><span class="w95-pct">0%</span></span></span></div>
+    </div>
+  </section>
   </div>
 
   <div class="tab" id="tab-liquidity">
-  <section>
-    <h2>Pool</h2>
-    <div class="panel">
-      <div class="assetnote" id="lpNote" hidden></div>
-      <div class="grid">
-        <div class="cell"><span class="k">Price</span><span class="v" id="lpPrice">—</span><span class="note" id="lpPriceUsd">—</span></div>
-        <div class="cell"><span class="k"><span class="pamp-mark">$PAMP</span> in the pool</span><span class="v" id="lpResPamp">—</span><span class="note">PulseX V2, 0.29% fee</span></div>
-        <div class="cell"><span class="k">PLS in the pool</span><span class="v" id="lpResPls">—</span><span class="note" id="lpTvl">—</span></div>
-        <div class="cell"><span class="k">Pair</span><span class="v" id="lpPair" style="font-size:15px">—</span><span class="note">PAMP/WPLS on the PulseX V2 factory</span></div>
-      </div>
-    </div>
-  </section>
-
   <section>
     <h2 id="swap">Swap</h2>
     <!-- A DEX-style card: "you pay" over "you receive", token pills, a flip arrow between
@@ -1381,6 +1382,19 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
       </div>
       <button id="swBtn" class="wide dex-go" disabled>Connect wallet</button>
       <div class="hint dex-hint" id="swHint">Trades straight against the PAMP/WPLS pair through the PulseX V2 router. The quote comes from the router itself; if the price moves past your tolerance before the transaction lands, it reverts and nothing is spent.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pool</h2>
+    <div class="panel">
+      <div class="assetnote" id="lpNote" hidden></div>
+      <div class="grid">
+        <div class="cell"><span class="k">Price</span><span class="v" id="lpPrice">—</span><span class="note" id="lpPriceUsd">—</span></div>
+        <div class="cell"><span class="k"><span class="pamp-mark">$PAMP</span> in the pool</span><span class="v" id="lpResPamp">—</span><span class="note">PulseX V2, 0.29% fee</span></div>
+        <div class="cell"><span class="k">PLS in the pool</span><span class="v" id="lpResPls">—</span><span class="note" id="lpTvl">—</span></div>
+        <div class="cell"><span class="k">Pair</span><span class="v" id="lpPair" style="font-size:15px">—</span><span class="note">PAMP/WPLS on the PulseX V2 factory</span></div>
+      </div>
     </div>
   </section>
 
@@ -3447,7 +3461,7 @@ function cycleEmission(d) {
   return null;
 }
 function renderCycles() {
-  if (!$("cycTable")) return;   // "Past cycles" went with the Stats tab
+  if (!$("cycTable")) return;
   const days = closedDays(), sel = $("cycDay"), sum = $("cycSummary"), box = $("cycTable");
   if (!days.length) {
     sel.innerHTML = ""; sum.innerHTML = "";
@@ -3568,7 +3582,8 @@ function entrantCostEth(m) {
 const entrantFuelEth = m => m.fuelEth !== undefined ? m.fuelEth : (S.K.fuelValue ? Number(E.formatEther(m.count * S.K.fuelValue)) : 0);
 function entrantCost(m) {
   const v = entrantCostEth(m);
-  return S.usd.pls ? fmtPrice(v * S.usd.pls, "$") : fmtPrice(v, "PLS");
+  // dollars always to the cent ($27.20, not $27.2); fmtPrice is for small unit prices
+  return S.usd.pls ? (fmtUsd(v * S.usd.pls) ?? "—") : fmtPrice(v, "PLS");
 }
 function entrantPrice(m, estPamp) {
   const pamp = Number(E.formatEther(estPamp));
