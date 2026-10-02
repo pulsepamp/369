@@ -165,6 +165,19 @@
   .wallet-bar .addr { font-family: var(--mono); color: var(--accent); }
   .wallet-bar button { margin-top: 0; }
   .wallet-bar-actions { justify-content: flex-end; }
+  /* the wallet picker: every installed wallet, under the Connect button that was clicked */
+  .connect-wrap { display: inline-flex; }
+  #walletPick { position: fixed; z-index: 120; width: 260px; max-height: 70vh; overflow: auto; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 8px; box-shadow: 0 18px 44px rgba(0,0,0,.55); display: flex; flex-direction: column; gap: 2px; }
+  #walletPick[hidden] { display: none; }
+  #walletPick.center { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); }
+  #walletPick .wp-head { font-family: var(--sans); font-size: 12px; color: var(--text-dim); padding: 4px 8px 6px; letter-spacing: .04em; }
+  #walletPick button { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; padding: 9px 10px; text-align: left; background: none;
+    border: 0; border-radius: 10px; color: var(--text); font-family: var(--sans); font-size: 14px; font-weight: 500; }
+  #walletPick button:hover { background: rgba(91,140,255,.12); }
+  #walletPick img, #walletPick .wp-ico { width: 24px; height: 24px; border-radius: 6px; flex: none; }
+  #walletPick .wp-ico { background: linear-gradient(110deg, #0078ff, #6a00ff); }
+  #walletPick .wp-none { font-family: var(--sans); font-size: 12.5px; color: var(--text-dim); padding: 8px; line-height: 1.55; }
   .wallet-bar-actions #walletStatus { font-family: var(--mono); color: var(--text-dim); font-size: 13px; }
 
   /* The connected wallet and what it holds, sat under the amount controls — it is
@@ -362,6 +375,9 @@
   .stk-stats { display: flex; flex-wrap: wrap; gap: 18px 28px; margin: 6px 0 16px; font-family: var(--sans); font-size: 13px; }
   .stk-stats .k { display: block; color: var(--text-dim); font-size: 11.5px; letter-spacing: 0.04em; margin-bottom: 3px; }
   .stk-stats .v { color: var(--green); font-variant-numeric: tabular-nums; }
+  .stk-claimall { display: block; margin: 7px 0 0; padding: 6px 12px; font-size: 12.5px; font-weight: 600; border-radius: 8px;
+    background: linear-gradient(110deg, #0078ff, #6a00ff); border: 0; color: #fff; }
+  .stk-claimall:disabled { background: var(--panel-2, #161e2a); color: var(--text-dim); }
   .stk-stats .v .muted { color: var(--text-dim); font-weight: 400; }
   .tablewrap { overflow-x: auto; }
   th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
@@ -523,7 +539,8 @@
     .masthead { flex-direction: column; gap: 14px; }
     .masthead .wallet-bar { padding-top: 0; width: 100%; }
     .wallet-bar-actions { justify-content: flex-start; gap: 10px; }
-    .wallet-bar-actions #connect { flex: 1 1 auto; }
+    .wallet-bar-actions #connect, .wallet-bar-actions .connect-wrap { flex: 1 1 auto; }
+    .connect-wrap #connect { width: 100%; }
     .wallet-bar-actions #walletStatus { order: 3; width: 100%; }
     .keystats { grid-template-columns: 1fr; gap: 18px; margin-top: 22px; padding-top: 20px; }
     .keystats .tvl-v, .keystats .price-big { font-size: 30px; }
@@ -640,6 +657,9 @@ button.wide:hover:not(:disabled), #connect:hover:not(:disabled), #stkBtn:hover:n
 details.more summary { color: var(--accent-dim); }
 .tgbtn, .linkbtn { border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--text); font-family: var(--sans); font-size: 13.5px; font-weight: 500; letter-spacing: 0; text-shadow: none; padding: 9px 16px; }
 .tgbtn:hover, .linkbtn:hover { border-color: var(--accent); background: var(--panel-2); color: var(--text); }
+/* the way back to the Robinhood version: forest green */
+.linkbtn.rhbtn { background: #228b22; border-color: #228b22; color: #fff; }
+.linkbtn.rhbtn:hover { background: #2a9d2a; border-color: #2a9d2a; color: #fff; }
 .order-box { background: var(--bg); border-radius: var(--radius-sm); }
 .order-box .line strong { font-family: var(--sans); font-weight: 600; color: var(--text); }
 .cs-box { border-radius: var(--radius-sm); }
@@ -719,6 +739,10 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
   /* ---- liquidity tab ---- */
   .lp-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); gap: 24px; align-items: start; }
   .lp-cols .wide { margin-top: 14px; }
+  /* the PulseChain logo before every PLS figure ("12,795 [logo]PLS"); placed by plsMark() */
+  .pls-ico { display: inline-block; width: 1em; height: 1em; margin: 0 .2em 0 .05em; vertical-align: -.14em; flex: none;
+    background: url("data:image/png;base64,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") center / contain no-repeat; }
+
   /* ---- loading bars, Windows 95 style ----
      A sunken grey box that fills with navy blocks, the percentage beside it. Where the length
      of a wait is known (reading a wallet's $FUEL mint slots) the figure is real; where it is
@@ -915,6 +939,7 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
 </style>
 </head>
 <body>
+<div id="walletPick" role="dialog" aria-label="Choose a wallet" hidden></div>
 <div class="wrap">
 
   <header>
@@ -927,7 +952,7 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
       <div class="wallet-bar wallet-bar-actions">
         <a class="tgbtn" href="https://t.me/PAMPMORE" target="_blank" rel="noopener" title="Join the $PAMP MORE Telegram"><svg class="tg-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>Telegram</a>
         <span id="walletStatus">Not connected</span>
-        <button id="connect">Connect wallet</button>
+        <span class="connect-wrap"><button id="connect">Connect wallet</button></span>
       </div>
     </div>
 
@@ -1577,288 +1602,10 @@ svg text[fill="#e0b358"] { fill: var(--amber); }
   </section>
   </div>
 
-  <div class="tab" id="tab-whitepaper">
-  <!-- ============================ white paper ============================ -->
-  <section id="whitepaper">
-    <h2>White paper</h2>
-    <div class="panel">
-      <div class="wp">
-        <div class="wp-close"><button class="sm" id="wpClose">Back to the auction</button></div>
-    <p class="lede">A 1,000-day daily auction on PulseChain (chain 369). Supply is hard-capped at
-      10,000,000 PAMP. Every entry is worth a
-      flat 25,000 PLS: 50% of it is <span class="fuel-tick">$FUEL</span>, burned in the same transaction; 20% is PLS yield paid
-      to PAMP that is unclaimed or staked; 30% feeds a PAMP buy-and-burn that drips a share of its
-      pool a day. Claimed PAMP can be staked for 7 to 1,000 days.</p>
-  </header>
-
-  <nav class="toc">
-    <span class="k">Contents</span>
-    <ol>
-      <li><a href="#wp-auction">How the auction works</a></li>
-      <li><a href="#wp-emission">Emission schedule</a></li>
-      <li><a href="#wp-eth">Where each entry goes</a></li>
-      <li><a href="#wp-fuel">Pricing the <span class="fuel-tick">$FUEL</span> share</a></li>
-      <li><a href="#wp-yield">The PLS yield</a></li>
-      <li><a href="#wp-burn">The $PAMP buy and burn</a></li>
-      <li><a href="#wp-staking">Staking</a></li>
-      <li><a href="#wp-contracts">Parameters</a></li>
-    </ol>
-  </nav>
-
-  <section id="wp-auction">
-    <h2>How the auction works</h2>
-    <p>The entry price is fixed and the token rate is not. Each day is a fixed 86,400-second
-      window in which anyone may buy 1 to 1,000 entries per transaction. An entry is worth
-      25,000 PLS, paid partly as PLS with the transaction and partly as 50% of that value
-      <em>worth</em> of <span class="fuel-tick">$FUEL</span> taken from the buyer's wallet. There is no limit on how many transactions one
-      address sends.</p>
-    <p>When the day closes, that day's emission is split across every entry sold that day:</p>
-
-    <div class="formula">
-      your PAMP &nbsp;=&nbsp; emission(d) &nbsp;×&nbsp;
-      <span class="frac">
-        <span class="num">your entries on d</span>
-        <span class="den">total entries on d</span>
-      </span>
-    </div>
-
-    <p>Everyone who enters on a given day receives the same rate, so there is nothing to gain
-      by timing a purchase within the day. The rate falls as the day sells more: a day that
-      sells 10 entries pays ten times per entry what the same day would pay at 100. A day that
-      sells nothing mints nothing, which is why final supply can end below the cap but never
-      above it.</p>
-    <p>Entering and claiming are separate steps. Entering records your share; after the day
-      closes you call <code>claim(day)</code>, or <code>claimMany</code> for several days at
-      once, and the contract mints your PAMP then — together with the PLS yield that PAMP
-      earned while it waited (see below). Unclaimed days do not expire.</p>
-    <p>The contract takes exactly the <span class="fuel-tick">$FUEL</span> an entry costs at the moment the transaction
-      lands. The caller passes <code>maxFuel</code>, a cap on what may be taken, so a price
-      move between quoting and landing cannot take more than the caller agreed to; the
-      transaction reverts instead and nothing is spent.</p>
-  </section>
-
-  <section id="wp-emission">
-    <h2>Emission schedule</h2>
-    <p>The first two weeks are steep: days 1 to 14 fall at 0.948 a day, so day 14 emits exactly
-      half of day 1 (48,653 PAMP on day 1, 24,326 on day 14). From day 14 the Robinhood curve
-      takes over — every day emits 0.997698&times; the day before — down to 2,507 PAMP on day
-      1,000, a tenth of day 14. The table also holds a day 0, one step above day 1 on the same
-      slope, minted once at genesis. All 1,001 amounts sum to exactly 10,000,000 PAMP and are
-      stored on chain as a fixed table whose sum the contract checks when it is deployed. The
-      first fortnight of auctions hands out about 4.93% of the supply.</p>
-
-    <figure>
-      <div class="ttl">PAMP emitted per day</div>
-      <div class="sub">Sampled every 25 days. Day 14 is half of day 1; day 1,000 is a tenth of day 14.</div>
-      <svg id="chartEmission" viewBox="0 0 640 220" role="img"
-           aria-label="Line chart of PAMP emitted per day, falling from 48,653 on day 1 to 2,507 on day 1,000, steeply for the first two weeks."></svg>
-    </figure>
-
-    <figure>
-      <div class="ttl">Cumulative supply issued</div>
-      <div class="sub">Upper bound: assumes every day sells at least one entry. Includes day 0, minted at genesis.</div>
-      <svg id="chartCumulative" viewBox="0 0 640 220" role="img"
-           aria-label="Line chart of cumulative PAMP issued, rising to 10,000,000 by day 1,000."></svg>
-      <figcaption>Source: the deployed emission table, sampled every 25 days.</figcaption>
-    </figure>
-  </section>
-
-  <section id="wp-eth">
-    <h2>Where each entry goes</h2>
-    <p>Every entry splits its value in the same transaction, in fixed proportions the contract
-      stores as constants:</p>
-
-    <div class="flow">
-      <div class="flow-row">
-        <div class="flow-leg enforced">
-          <span class="pct">50%</span>
-          <span class="what"><span class="fuel-tick">$FUEL</span>, burned</span>
-          <span class="note">Half the entry's value in <span class="fuel-tick">$FUEL</span>, priced by the FUEL/WPLS
-            PulseX pair, moved from the buyer's wallet straight to <span class="mono">0x…dEaD</span>.
-            It never sits in a contract.</span>
-        </div>
-        <div class="flow-leg enforced">
-          <span class="pct">20%</span>
-          <span class="what">PLS yield</span>
-          <span class="note">5,000 PLS per entry into the yield contract, split at once over
-            every PAMP that is unclaimed or staked.</span>
-        </div>
-        <div class="flow-leg enforced">
-          <span class="pct">30%</span>
-          <span class="what">Buy and burn $PAMP</span>
-          <span class="note">7,500 PLS per entry into the burner's pool, which drips 1–15% a day (1% at launch)
-            into PAMP buys sent to <span class="mono">0x…dEaD</span>.</span>
-        </div>
-      </div>
-    </div>
-
-  </section>
-
-  <section id="wp-fuel">
-    <h2>Pricing the <span class="fuel-tick">$FUEL</span> share</h2>
-    <p>Each entry takes half its value in <span class="fuel-tick">$FUEL</span>. Converting that value into a <span class="fuel-tick">$FUEL</span> amount
-      needs a price, and the price has to survive two things: a genuine fast move, and someone
-      pushing the pool for a few blocks to make entries cheaper.</p>
-    <p>PulseX pairs are Uniswap V2 pairs: they publish a running cumulative of their price but
-      keep no history, so the auction keeps its own. Every entry, and anyone who calls
-      <code>poke()</code>, stores a checkpoint of the pair's cumulative price — at most one
-      every 10 seconds, in a ring of 128. From those the contract reads the price two ways —
-      <strong>spot</strong>, and the <strong>15-minute average</strong> — and charges whichever
-      gives <em>more</em> <span class="fuel-tick">$FUEL</span> per entry:</p>
-    <ul>
-      <li><strong>A drop is charged at once.</strong> If <span class="fuel-tick">$FUEL</span> falls 28% in one block, the next
-        entry takes about 39% more <span class="fuel-tick">$FUEL</span>: spot already says so.</li>
-      <li><strong>A pump buys no discount.</strong> If <span class="fuel-tick">$FUEL</span> is pushed up for a few blocks, spot
-        says entries should be cheap, but the 15-minute average still applies.</li>
-      <li><strong>Entries never pause for a price move.</strong> The only thing that stops
-        pricing is having no checkpoint at least 15 minutes old, which is true only for the
-        first 15 minutes after deployment. A collapse to a tenth of today's price simply means
-        ten times the <span class="fuel-tick">$FUEL</span> per entry.</li>
-    </ul>
-    <p>The contract also keeps a readable <strong>price log</strong>: spot, the average and the
-      <span class="fuel-tick">$FUEL</span> per entry being charged, stored with each checkpoint once the average exists
-      (<code>samples</code>, <code>latestSample</code>, <code>samplesRange</code>) and emitted as
-      an event, so the price the auction charged at any moment is a matter of record.</p>
-    <p>A manipulation that did work would have to hold the pair's price for a full 15 minutes
-      against anyone who trades it back, paying the pair's 0.29% fee and impact both ways, for a
-      discount capped at the size of the move on 50% of the entries bought inside that window.</p>
-  </section>
-
-  <section id="wp-yield">
-    <h2>The PLS yield</h2>
-    <p>A fifth of every entry is paid to PAMP that is <em>not</em> sitting in a wallet: PAMP
-      still unclaimed in the auction, and PAMP locked in the staking contract. One index does
-      the whole job. It counts the PLS ever distributed per PAMP of eligible weight, and every
-      deposit raises it by the deposit divided by the weight of that moment:</p>
-
-    <div class="formula">
-      index &nbsp;+=&nbsp;
-      <span class="frac">
-        <span class="num">PLS deposited</span>
-        <span class="den">unclaimed PAMP + staked PAMP</span>
-      </span>
-    </div>
-
-    <ul>
-      <li><strong>Unclaimed PAMP.</strong> When a day closes, the auction records the index at
-        that moment. Claiming the day later pays <code>amount × (index now − index at close)</code>
-        in PLS along with the PAMP. Leave a day unclaimed for a year and it earns for a year.</li>
-      <li><strong>Staked PAMP.</strong> A stake records the index when it opens. <code>claimPls</code>
-        pays what it has earned since and leaves the stake open; <code>unstake</code> pays it in
-        full, whatever the PAMP penalty. PLS already earned is never reduced.</li>
-      <li><strong>Wallet PAMP earns nothing.</strong> Between a claim and a stake, tokens are
-        out of the index. Claim and stake in one go to keep them in it.</li>
-      <li><strong>Nothing is lost.</strong> A deposit that arrives while nothing is eligible
-        waits, and rounding remainders wait too; both join the next split. Only the auction and
-        the staking contract can take PLS out, each for exactly what it has computed.</li>
-    </ul>
-  </section>
-
-  <section id="wp-burn">
-    <h2>The <span class="pamp-mark">$PAMP</span> buy and burn</h2>
-    <p>Thirty percent of every entry lands in a pool that buys PAMP and sends it to
-      <code>0x…dEaD</code>. The contract is a port of the <span class="fuel-tick">$FUEL</span> protocol's own buy-and-burn
-      (itself a cut-down LessBuyAndProcess), with the same drip:</p>
-    <ul>
-      <li><strong>A share of the pool every day</strong> — 1% at launch, adjustable between 1% and 15% by the rate setter — in 144 intervals of 10 minutes. Each interval
-        is entitled to 1/144 of the day's allocation, computed from the pool as it stands when
-        the interval opens; intervals nobody executes stack onto the next call, capped at the
-        pool.</li>
-      <li><strong>Anyone executes it</strong> with <code>swapPlsForPampAndBurn</code> and keeps
-        1.5% of the interval's PLS. The rest is wrapped, sent to the PAMP/WPLS PulseX pair, and
-        the PAMP the pair pays goes straight to the dead address.</li>
-      <li><strong>A 15-minute average guards the swap.</strong> The burner keeps its own
-        checkpoints of the pair, like the auction does for <span class="fuel-tick">$FUEL</span>, and refuses any swap that
-        would deliver less than 90% of the average's quote. A thin or pushed pool parks the
-        interval rather than buying badly.</li>
-      <li><strong>Deposits never touch the interval bookkeeping.</strong> Only the burn function
-        advances it, which is the fix the <span class="fuel-tick">$FUEL</span> burner shipped after community testing found two
-        back-to-back deposits could orphan an interval.</li>
-    </ul>
-    <p>What the original left to an owner — the daily rate (1–10%) and the slippage tolerance —
-      is narrowed here: a rate setter fixed at deployment may move the daily rate between 1% and
-      15% (1% at launch), and the slippage tolerance is a constant 10%. That rate is the only
-      adjustable parameter in PAMP; nothing else has an owner.
-      The original's pool creation, liquidity seeding and fee collection are gone too: the
-      PAMP/WPLS pair is seeded by hand, and until it exists and has 15 minutes of history the
-      burner reports "not started yet" and the PLS simply accumulates.</p>
-  </section>
-
-  <section id="wp-staking">
-    <h2>Staking</h2>
-    <p>Claimed PAMP can be locked in a staking contract that is the Robinhood Chain PAMP staking
-      contract — itself a fork of the $MORE staking contract, taken from Sourcify — with PLS
-      rewards added. The mechanics are the original's; the token is $PAMP.</p>
-    <ul>
-      <li><strong>Lock 7 to 1,000 days.</strong> Any amount; several stakes per address.</li>
-      <li><strong>Leaving early forfeits the unserved share.</strong> A stake at 25% of its
-        term keeps 25% of principal plus PAMP rewards; the other 75% is the penalty.</li>
-      <li><strong>14 days of grace after unlock,</strong> then a late penalty grows linearly and
-        reaches 100% a further 700 days on.</li>
-      <li><strong>Every PAMP penalty is recycled</strong> to the stakes still open, pro rata by
-        amount, through a cumulative reward-per-token index. That is the only source of PAMP
-        rewards: no emission, no fixed rate.</li>
-      <li><strong>PLS is separate.</strong> Every open stake earns the protocol's PLS yield from
-        the index above; penalties never touch it.</li>
-    </ul>
-    <p>There is no owner. The original's one owner power — sweeping tokens sent to the
-      contract by mistake — is permissionless here and can never touch
-      $PAMP. Because $PAMP supports EIP-2612, <code>stakeWithPermit</code> opens a stake in one
-      transaction.</p>
-  </section>
-
-  <section id="wp-contracts">
-    <h2>Parameters</h2>
-    <p>Six contracts on PulseChain (chain 369): the emission table, the token, the yield, the
-      buy-and-burn, the auction and the staking. Every parameter below is a <code>constant</code>
-      or <code>immutable</code>. None can be changed after deployment, by anyone. Contract
-      addresses are published on the dashboard, which reads each one back from the chain and
-      flags any mismatch.</p>
-
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
-        <tbody>
-          <tr><td>MAX_SUPPLY</td><td>10,000,000 PAMP</td></tr>
-          <tr><td>Day 0, minted at genesis</td><td>51,317.43 PAMP (0.51% of supply); days 1–1000 total 9,948,682.57</td></tr>
-          <tr><td>ENTRY_VALUE</td><td>25,000 PLS (half in PLS, half in <span class="fuel-tick">$FUEL</span>)</td></tr>
-          <tr><td>MIN_ENTRIES / MAX_ENTRIES</td><td>1 / 1,000 per transaction</td></tr>
-          <tr><td><span class="fuel-tick">$FUEL</span> burned / PLS yield / PAMP buy-and-burn</td><td>50% / 20% / 30%</td></tr>
-          <tr><td>DAY_LENGTH / TOTAL_DAYS</td><td>86,400 s / 1,000</td></tr>
-          <tr><td>longWindow / SAMPLE_INTERVAL</td><td>900 s / 10 s</td></tr>
-          <tr><td>Burner dailyAllocationBps at launch / range / INTERVALS_PER_DAY</td><td>100 (1%) / 100–1,500 (1–15%) / 144</td></tr>
-          <tr><td>Burner INCENTIVE_FEE / SLIPPAGE_PCT / TWAP_WINDOW</td><td>150 / 10% / 900 s</td></tr>
-          <tr><td>Staking MIN / MAX_STAKE_DURATION</td><td>7 / 1,000 days</td></tr>
-          <tr><td>LATE_PENALTY_GRACE / SCALE</td><td>14 / 700 days</td></tr>
-          <tr><td>PulseX V2 factory</td><td>0x29eA7545DEf87022BAdc76323F373EA1e707C523</td></tr>
-          <tr><td>WPLS</td><td>0xA1077a294dDE1B09bB078844df40758a5D0f9a27</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>There is no admin role, no pause and no upgrade path in any of the six contracts, and no
-      owner apart from the burner's rate setter, a fixed address whose only power is the daily
-      drip rate. The token's <code>configure</code> function, which names the auction as the
-      only minter, is callable by anyone exactly once and is called in the deployment
-      transaction sequence. The yield contract's two spenders are fixed at deployment from
-      predicted addresses and asserted afterwards. Every mechanism is covered by unit tests
-      against a mock PulseX pair that enforces the real 0.29% fee, and by fork tests against
-      the live chain that buy from a real pair, seed a real PAMP/WPLS pair and run a real
-      burn. A read-only verification script audits the live deployment and reverts on the
-      first mismatch.</p>
-  </section>
-
-
-      </div>
-    </div>
-  </section>
-  </div>
-
   <footer>
     <div class="footlinks">
       <a class="linkbtn" href="https://t.me/PAMPMORE" target="_blank" rel="noopener"><svg class="tg-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>Telegram</a>
-      <a class="linkbtn" href="#whitepaper" id="wpOpen">White paper</a>
-      <a class="linkbtn" href="https://willis5555.github.io/PAMP/" target="_blank" rel="noopener" title="The live $PAMP auction on Robinhood Chain">Robinhood $PAMP</a>
+      <a class="linkbtn rhbtn" href="https://willis5555.github.io/PAMP/" target="_blank" rel="noopener" title="The live $PAMP auction on Robinhood Chain">Robinhood $PAMP</a>
       <a class="linkbtn" href="https://willis5555.github.io/FUEL/" target="_blank" rel="noopener" title="The $FUEL protocol dashboard">$FUEL dashboard</a>
       <a class="linkbtn" href="https://willis5555.github.io/MOREDASHBOARD/" target="_blank" rel="noopener" title="The $MORE staking dashboard">$MORE dashboard</a>
     </div>
@@ -2693,7 +2440,7 @@ function renderClaims() {
   if (!days.length) {
     // Nothing closed yet: the buttons wait, greyed out, showing what today would deliver.
     const est = (W.todayMints > 0 && L.emission && L.mintsSold > 0) ? (L.emission * BigInt(W.todayMints)) / BigInt(L.mintsSold) : 0n;
-    const estText = est > 0n ? `≈ ${fmtTok(est, 2)} ${K.symbol || "PAMP"}` : "nothing yet";
+    const estText = est > 0n ? `≈ ${fmtTok(est, 2)} ${PAMP_MARK}` : "nothing yet";
     $("claimBody").innerHTML = `
       <span class="hint">${est > 0n ? `Your ${nf(W.todayMints)} ${W.todayMints === 1 ? "entry" : "entries"} today would give ${estText} if the day closed now. It becomes claimable at the rollover.` : "Nothing to claim yet. A day becomes claimable once it closes."}</span>
       <div class="claim-row">
@@ -2709,8 +2456,8 @@ function renderClaims() {
     <table><thead><tr><th>Day</th><th class="num">${PAMP_MARK}</th><th class="num">PLS yield</th></tr></thead>
     <tbody>${days.map((d, i) => `<tr><td>${Number(d) <= DAY_OFFSET ? "pre-launch" : dispDay(Number(d))}</td><td class="num">${pamp$(amounts[i], 4)}</td><td class="num">${fmtPls(plsYields[i], 2)}</td></tr>`).join("")}</tbody></table>
     <div class="claim-row">
-      <button id="claimAll">Claim ${days.length} day${days.length > 1 ? "s" : ""} — ${fmtTok(total, 2)} ${K.symbol}${totalPls > 0n ? " + " + fmtPls(totalPls) : ""}</button>
-      <button id="claimStake"${stakingDeployed() ? "" : " hidden"}>Claim + Time Lock — ${fmtTok(total, 2)} ${K.symbol}</button>
+      <button id="claimAll">Claim ${days.length} day${days.length > 1 ? "s" : ""} — ${fmtTok(total, 2)} ${PAMP_MARK}${totalPls > 0n ? " + " + fmtPls(totalPls) : ""}</button>
+      <button id="claimStake"${stakingDeployed() ? "" : " hidden"}>Claim + Time Lock — ${fmtTok(total, 2)} ${PAMP_MARK}</button>
       ${approveRow()}
     </div>`;
   $("claimAll").onclick = () => doClaim(days.map(Number));
@@ -2743,7 +2490,7 @@ function syncClaimStake() {
     : "Two transactions: the claim, then the stake. The stake asks for a signature instead of an approval, unless you approve staking first. Unstaking early costs a penalty, as on the staking tab.";
   const ok = total > 0n && days >= STK.MIN_DAYS && days <= STK.MAX_DAYS;
   $("csGo").disabled = !ok || !S.signer;
-  $("csGo").textContent = !S.signer ? "Connect wallet" : total > 0n ? `Claim ${fmtTok(total, 2)} ${K.symbol || "PAMP"} and stake it for ${nf(days)} day${days === 1 ? "" : "s"}` : "Nothing to claim";
+  $("csGo").innerHTML = !S.signer ? "Connect wallet" : total > 0n ? `Claim ${fmtTok(total, 2)} ${PAMP_MARK} and stake it for ${nf(days)} day${days === 1 ? "" : "s"}` : "Nothing to claim";
 }
 /* An EIP-2612 permit signed by the wallet: the staking contract spends the tokens with it, so
    there is no approval transaction. Falls back to approve + stake if the wallet cannot sign. */
@@ -3052,16 +2799,20 @@ function renderStakes() {
   const withUsd = bn => { const u = bn > 0n ? fmtUsd(usdOf(bn, px.price)) : null; return pamp(bn, 2) + (u ? ` <span class="muted">≈ ${u}${px.derived ? "*" : ""}</span>` : ""); };
   const roi = roiPct(pending + claimed - penalty, principal);
   const showRoi = (S.L.stDist ?? 0n) > 0n || (S.recentStakes && S.recentStakes.events && S.recentStakes.events.some(e => e.kind === "close"));
+  // every open stake with PLS waiting; the contract claims one stake per transaction
+  const claimable = list.filter(s => s.info.status && (s.pls ?? 0n) > 0n);
+  const canClaimAll = !!S.signer && !S.viewOnly && claimable.length > 0;
   const stats = `<div class="stk-stats">
       <div><span class="k">Open</span><span class="v">${open} of ${list.length}</span></div>
       <div><span class="k">Staked</span><span class="v">${withUsd(locked)}</span></div>
       ${showRoi ? `<div><span class="k">Rewards</span><span class="v">${withUsd(pending)}</span></div>` : ""}
       <div><span class="k">Combined</span><span class="v">${withUsd(locked + pending)}</span></div>
       ${showRoi ? `<div><span class="k">ROI</span><span class="v">${roi == null ? "—" : (roi >= 0 ? "+" : "") + roi.toFixed(2) + "%"}</span></div>` : ""}
-      <div><span class="k">PLS to claim</span><span class="v">${fmtPls(pls, 2)}</span></div>
+      <div><span class="k">PLS to claim</span><span class="v">${fmtPls(pls, 2)}</span>${claimable.length ? `<button type="button" class="stk-claimall" id="stkClaimAll"${canClaimAll ? "" : " disabled"} title="Claims the PLS yield of every open stake, one transaction per stake. The stakes stay open.">Claim all yield${claimable.length > 1 ? ` (${claimable.length} stakes)` : ""}</button>` : ""}</div>
       <div><span class="k">PLS paid</span><span class="v">${fmtPls(plsPaid, 2)}</span></div>
     </div>`;
-  if (!rows.length) { box.innerHTML = stats + `<span class="hint">${list.length ? "No open stakes. Tick “Show closed stakes” to see the rest." : "No stakes yet."}</span>`; return; }
+  const bindClaimAll = () => { const b = $("stkClaimAll"); if (b) b.onclick = () => doClaimAllPls(b); };
+  if (!rows.length) { box.innerHTML = stats + `<span class="hint">${list.length ? "No open stakes. Tick “Show closed stakes” to see the rest." : "No stakes yet."}</span>`; bindClaimAll(); return; }
 
   // ROI only means something once penalties have been recycled, i.e. after the first unstake
   // rewards and ROI only exist once penalties have been recycled, i.e. after the first unstake
@@ -3081,6 +2832,7 @@ function renderStakes() {
   });
   box.querySelectorAll("button[data-stake]").forEach(b => b.onclick = () => doUnstake(BigInt(b.dataset.stake), b));
   box.querySelectorAll("button[data-claimpls]").forEach(b => b.onclick = () => doClaimPls(BigInt(b.dataset.claimpls), b));
+  bindClaimAll();
 }
 
 async function doStake() {
@@ -3106,6 +2858,20 @@ async function doUnstake(id, btn) {
   if (!S.signer) return connect();
   const c = new E.Contract(A.staking, ABI.staking, S.signer);
   await withTx(btn, `Unstake #${id}`, () => c.unstake(id));
+  await loadWallet().catch(() => {});
+}
+/* Claim all yield: claimPls on every open stake with PLS waiting, in turn, one wallet
+   confirmation each; it stops at the first one that is cancelled or fails. */
+async function doClaimAllPls(btn) {
+  if (!S.signer) return connect();
+  const todo = (S.stakes || []).filter(s => s.info.status && (s.pls ?? 0n) > 0n);
+  if (!todo.length) return;
+  const c = new E.Contract(A.staking, ABI.staking, S.signer);
+  for (let i = 0; i < todo.length; i++) {
+    const s = todo[i];
+    const label = todo.length > 1 ? `PLS claim ${i + 1} of ${todo.length} (stake #${s.id})` : `PLS claim for stake #${s.id}`;
+    if (!await withTx(btn, label, () => c.claimPls(BigInt(s.id)))) break;
+  }
   await loadWallet().catch(() => {});
 }
 async function doClaimPls(id, btn) {
@@ -3804,80 +3570,8 @@ CHART_HOSTS.forEach(id => {
   host.addEventListener("pointerleave", () => clearChartTips(null));
 });
 
-/* ===================================================================
-   The white paper, embedded: opened by the footer button, drawn once on load
-   =================================================================== */
-(function () {
-
-/* The schedule sampled every 25 days. Drawn inline rather than pulled from a chart
-   library so this page stays one file with no network dependency beyond the fonts. */
-var WP_EMISSION = [[1,48653],[25,23717],[50,22389],[75,21136],[100,19952],[125,18835],[150,17780],[175,16785],
-[200,15845],[225,14958],[250,14120],[275,13330],[300,12583],[325,11879],[350,11214],[375,10586],
-[400,9993],[425,9433],[450,8905],[475,8407],[500,7936],[525,7491],[550,7072],[575,6676],
-[600,6302],[625,5949],[650,5616],[675,5302],[700,5005],[725,4725],[750,4460],[775,4210],
-[800,3975],[825,3752],[850,3542],[875,3344],[900,3156],[925,2980],[950,2813],[975,2655],
-[1000,2507]];
-
-var WP_CUMULATIVE = [[1,99970],[25,808081],[50,1383594],[75,1926881],[100,2439748],[125,2923898],[150,3380938],
-[175,3812387],[200,4219678],[225,4604163],[250,4967120],[275,5309753],[300,5633201],
-[325,5938538],[350,6226778],[375,6498878],[400,6755743],[425,6998225],[450,7227129],
-[475,7443217],[500,7647205],[525,7839770],[550,8021554],[575,8193158],[600,8355154],
-[625,8508080],[650,8652442],[675,8788721],[700,8917369],[725,9038814],[750,9153459],
-[775,9261684],[800,9363850],[825,9460294],[850,9551339],[875,9637286],[900,9718420],
-[925,9795011],[950,9867314],[975,9935568],[1000,10000000]];
-
-var WP_NS = "http://www.w3.org/2000/svg";
-
-function wpShortNum(v) {
-  if (v >= 1e6) return (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M";
-  if (v >= 1e3) return Math.round(v / 1e3) + "k";
-  return String(v);
-}
-
-function wpEl(name, attrs, text) {
-  var n = document.createElementNS(WP_NS, name);
-  for (var k in attrs) n.setAttribute(k, attrs[k]);
-  if (text != null) n.textContent = text;
-  return n;
-}
-
-/* yFloor exists because the two charts want different baselines: emission reads better
-   zoomed to its own range, cumulative only makes sense against zero and the 100M cap. */
-function wpDraw(id, rows, yFloor, yCeil) {
-  var svg = document.getElementById(id);
-  if (!svg) return;
-  var W = 640, H = 220, L = 52, R = 8, T = 10, B = 28;
-  var xs = rows.map(function (r) { return r[0]; });
-  var ys = rows.map(function (r) { return r[1]; });
-  var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
-  var y0 = yFloor != null ? yFloor : Math.min.apply(null, ys);
-  var y1 = yCeil != null ? yCeil : Math.max.apply(null, ys);
-  var px = function (v) { return L + (v - x0) / (x1 - x0) * (W - L - R); };
-  var py = function (v) { return T + (1 - (v - y0) / (y1 - y0)) * (H - T - B); };
-
-  var i, v;
-  // horizontal gridlines with their value labels
-  for (i = 0; i <= 4; i++) {
-    v = y0 + (y1 - y0) * i / 4;
-    svg.appendChild(wpEl("line", { x1: L, y1: py(v), x2: W - R, y2: py(v), "class": "gridline" }));
-    svg.appendChild(wpEl("text", { x: L - 8, y: py(v) + 3.5, "class": "tick", "text-anchor": "end" }, wpShortNum(v)));
-  }
-  // day markers along the bottom
-  [1, 250, 500, 750, 1000].forEach(function (d) {
-    svg.appendChild(wpEl("text", { x: px(d), y: H - 8, "class": "tick", "text-anchor": "middle" }, d === 1 ? "1" : String(d)));
-  });
-  svg.appendChild(wpEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, "class": "axis" }));
-
-  var d = rows.map(function (r, n) { return (n ? "L" : "M") + px(r[0]).toFixed(1) + " " + py(r[1]).toFixed(1); }).join(" ");
-  svg.appendChild(wpEl("path", { d: d, "class": "plot" }));
-}
-
-wpDraw("chartEmission", WP_EMISSION, 0, null);
-wpDraw("chartCumulative", WP_CUMULATIVE, 0, 10000000);
-
-})();
 /* ---- tabs: one group of sections visible at a time; the hash remembers which ---- */
-const TABS = ["auction", "staking", "burn", "charts", "liquidity", "fuel", "whitepaper"];
+const TABS = ["auction", "staking", "burn", "charts", "liquidity", "fuel"];
 function selectTab(name, { scroll = false } = {}) {
   if (!TABS.includes(name)) name = "auction";
   document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
@@ -3889,25 +3583,13 @@ function selectTab(name, { scroll = false } = {}) {
 document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => selectTab(b.dataset.tab)));
 function tabFromHash() {
   const h = location.hash.slice(1);
-  if (h.startsWith("wp-")) return "whitepaper";
   return TABS.includes(h) ? h : "auction";
 }
 selectTab(tabFromHash());
 window.addEventListener("hashchange", () => {
   const h = location.hash.slice(1);
   selectTab(tabFromHash());
-  if (h.startsWith("wp-")) { const t = document.getElementById(h); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }
 });
-function openWhitepaper(open) { selectTab(open ? "whitepaper" : "auction", { scroll: true }); }
-$("wpOpen").addEventListener("click", e => { e.preventDefault(); openWhitepaper(true); });
-$("wpClose").addEventListener("click", () => openWhitepaper(false));
-if (location.hash.slice(1).startsWith("wp-")) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView({ block: "start" }); }
-// links inside the paper's contents list stay inside the page
-$("whitepaper").addEventListener("click", e => {
-  const a = e.target.closest('a[href^="#wp-"]'); if (!a) return;
-  e.preventDefault(); const t = document.getElementById(a.getAttribute("href").slice(1)); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
-});
-
 /* ---- the one-second clock ---- */
 function tick() {
   const K = S.K, L = S.L;
@@ -4089,20 +3771,58 @@ async function ensureChain() {
   }
 }
 
+/* ---- wallets: every wallet that announces itself (EIP-6963: MetaMask, Rabby, OKX, Coinbase,
+   Brave…), plus the old injected window.okxwallet / window.ethereum for wallets that do not ---- */
+const WALLETS = new Map();
+window.addEventListener("eip6963:announceProvider", ev => {
+  const d = ev.detail;
+  if (d?.provider && d?.info) WALLETS.set(d.info.rdns || d.info.uuid, { name: d.info.name, icon: d.info.icon, rdns: d.info.rdns, provider: d.provider });
+});
+/* wallets left out of the picker, matched on the name or id they announce */
+const HIDDEN_WALLETS = /starkey/i;
+const hiddenWallet = w => HIDDEN_WALLETS.test(w.name || "") || HIDDEN_WALLETS.test(w.rdns || "") || !!(w.provider && (w.provider.isStarkey || w.provider.isStarKey));
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+function walletList() {
+  const list = [...WALLETS.values()], has = p => list.some(w => w.provider === p);
+  if (window.okxwallet && !has(window.okxwallet) && !list.some(w => /okx/i.test(w.name))) list.push({ name: "OKX Wallet", provider: window.okxwallet });
+  if (window.ethereum && !has(window.ethereum)) list.push({ name: window.ethereum.isMetaMask ? "MetaMask" : "Browser wallet", provider: window.ethereum });
+  return list.filter(w => !hiddenWallet(w));
+}
+const escHtml = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const closeWalletPick = () => { $("walletPick").hidden = true; };
+/* The picker opens under the Connect button that was clicked (any of them on the page), or in
+   the middle of the screen when that button is out of view. */
 async function connect() {
-  if (!window.ethereum) {
+  const anchor = document.activeElement && document.activeElement.tagName === "BUTTON" ? document.activeElement : $("connect");
+  window.dispatchEvent(new Event("eip6963:requestProvider"));
+  await sleep(150);
+  const list = walletList(), box = $("walletPick");
+  if (!list.length) {
     // MetaMask (and most wallets) refuse to inject into pages opened straight from disk.
     // Opening this file by double-click is the usual way to hit that, so say so rather
     // than telling someone who has a wallet to go and install one.
-    if (globalThis.location?.protocol === "file:") {
-      toast("Wallets do not inject into pages opened from disk (file://). Serve this folder over http — e.g. run  python -m http.server 8080  in the web/ folder and open http://localhost:8080 — then connect.", "err");
-    } else {
-      toast("No wallet found. Install MetaMask or another EIP-1193 wallet.", "err");
-    }
-    return;
+    box.innerHTML = globalThis.location?.protocol === "file:"
+      ? `<div class="wp-none">Wallets do not connect to a page opened from disk (file://). Serve this folder over http (for example <code>python -m http.server 8080</code> in the web/ folder, then open http://localhost:8080) and connect again.</div>`
+      : `<div class="wp-none">No wallet found in this browser. Install MetaMask, Rabby or OKX Wallet, or open this page in your wallet app's own browser.</div>`;
+  } else {
+    box.innerHTML = `<div class="wp-head">CHOOSE A WALLET</div>` + list.map((w, i) =>
+      `<button type="button" data-w="${i}">${w.icon && w.icon.startsWith("data:image/") ? `<img src="${w.icon}" alt="">` : `<span class="wp-ico"></span>`}${escHtml(w.name)}</button>`).join("");
+    box.querySelectorAll("button[data-w]").forEach(b => b.onclick = () => { closeWalletPick(); connectWith(list[+b.dataset.w]); });
   }
+  const r = anchor.getBoundingClientRect(), inView = r.bottom > 0 && r.top < innerHeight && r.width > 0;
+  box.classList.toggle("center", !inView);
+  if (inView) {
+    box.style.left = Math.max(8, Math.min(innerWidth - 268, r.right - 260)) + "px";
+    box.style.top = (r.bottom + 260 > innerHeight ? Math.max(8, r.top - 8 - Math.min(box.scrollHeight || 200, innerHeight * 0.7)) : r.bottom + 8) + "px";
+  }
+  box.hidden = false;
+}
+document.addEventListener("click", e => { if (!$("walletPick").hidden && !e.target.closest("#walletPick") && !e.target.closest("button")) closeWalletPick(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeWalletPick(); });
+async function connectWith(w) {
   try {
-    S.wallet = new E.BrowserProvider(window.ethereum);
+    S.eip = w.provider;
+    S.wallet = new E.BrowserProvider(w.provider);
     await S.wallet.send("eth_requestAccounts", []);
     await ensureChain();
     S.signer = await S.wallet.getSigner();
@@ -4114,10 +3834,12 @@ async function connect() {
     await loadWallet();
     syncCount(); renderBurner(); renderMinters(); syncStakeForm(); renderStakes();
     if ($("tab-liquidity").classList.contains("on")) lpRefresh().catch(() => {});
-    toast("Connected as " + short(S.account));
+    toast(`Connected ${escHtml(w.name)} as ${short(S.account)}`);
+    w.provider.on?.("accountsChanged", () => location.reload());
+    w.provider.on?.("chainChanged", () => location.reload());
   } catch (e) { toast(explainError(e), "err"); }
 }
-$("connect").onclick = connect;
+$("connect").onclick = e => { e.stopPropagation(); if (!$("walletPick").hidden) closeWalletPick(); else connect(); };
 
 /* Look at any address without a wallet: the same reads the connected view uses, with
    nothing to sign. A connected wallet always shows its own, so the row hides on connect. */
@@ -4140,13 +3862,10 @@ async function lookupAddress() {
 $("lookupBtn").onclick = lookupAddress;
 $("lookupAddr").addEventListener("keydown", e => { if (e.key === "Enter") lookupAddress(); });
 
-if (window.ethereum) {
-  window.ethereum.on?.("accountsChanged", () => location.reload());
-  window.ethereum.on?.("chainChanged", () => location.reload());
-}
+// account and network changes are watched on the wallet that was chosen, in connectWith()
 
 async function withTx(btn, label, fn) {
-  const old = btn.textContent;
+  const old = btn.innerHTML;   // innerHTML, so a label with the gold $PAMP or the PLS logo comes back as it was
   btn.disabled = true; btn.textContent = "Confirm in wallet…";
   try {
     const tx = await fn();
@@ -4160,7 +3879,7 @@ async function withTx(btn, label, fn) {
     toast(explainError(e), "err");
     return false;
   } finally {
-    btn.disabled = false; btn.textContent = old;
+    btn.disabled = false; btn.innerHTML = old;
     syncCount();
   }
 }
@@ -5059,6 +4778,54 @@ setInterval(() => {
   fuelTimers();
 }, 1000);
 setInterval(() => { if ($("tab-fuel").classList.contains("on") && !FUEL.busy) fuelRefresh(); }, 30000);
+
+/* ---- the PulseChain logo next to every PLS amount ----
+   Figures reach the page as plain text ("12,795 PLS") from dozens of places, so rather than touch
+   each one, every text node where a number runs into "PLS" gets the logo put in front of the
+   ticker, and a MutationObserver does the same for whatever the page writes later. A lone "PLS"
+   (a token button, a heading) has no figure in front of it and is left alone, which also keeps
+   this from ever marking the same amount twice. */
+const PLS_AMOUNT = /(\d[\d,]*(?:\.\d+)?(?:\s?[KMB])?\s*)PLS\b/g;
+const PLS_SKIP = "script, style, textarea, input, select, option, code, title, .pls-ico, #walletPick";
+function plsMark(root) {
+  if (!root) return;
+  if (root.nodeType === Node.TEXT_NODE) root = root.parentNode;
+  if (!root || root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(n) {
+    const p = n.parentElement;
+    if (!p || p.closest(PLS_SKIP)) return NodeFilter.FILTER_REJECT;
+    PLS_AMOUNT.lastIndex = 0;
+    return PLS_AMOUNT.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+  } });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (const n of nodes) {
+    const text = n.nodeValue, frag = document.createDocumentFragment();
+    let last = 0, m; PLS_AMOUNT.lastIndex = 0;
+    while ((m = PLS_AMOUNT.exec(text))) {
+      const at = m.index + m[1].length;   // where "PLS" starts
+      frag.append(text.slice(last, at));
+      const ic = document.createElement("span"); ic.className = "pls-ico"; ic.setAttribute("aria-hidden", "true");
+      frag.append(ic, "PLS");
+      last = at + 3;
+    }
+    frag.append(text.slice(last));
+    // one inline wrapper keeps the text a single item, so a flex row does not space the logo
+    // away from its figure the way it spaces separate children
+    const wrap = document.createElement("span"); wrap.className = "pls-txt"; wrap.append(frag);
+    n.replaceWith(wrap);
+  }
+}
+const plsPending = new Set(); let plsQueued = false;
+new MutationObserver(muts => {
+  for (const m of muts) {
+    if (m.type === "characterData") plsPending.add(m.target);
+    else for (const n of m.addedNodes) plsPending.add(n);
+  }
+  if (plsQueued) return;
+  plsQueued = true;
+  requestAnimationFrame(() => { plsQueued = false; const todo = [...plsPending]; plsPending.clear(); todo.forEach(n => { if (n.isConnected) plsMark(n); }); });
+}).observe(document.body, { childList: true, subtree: true, characterData: true });
+plsMark(document.body);
 
 boot();
 </script>
