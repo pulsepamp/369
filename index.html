@@ -2901,9 +2901,36 @@ async function doClaimPls(id, btn) {
 $("stkBtn").onclick = doStake;
 
 /* ---- dollar prices ----
-   PLS/USD from CoinGecko, DexScreener's WPLS pairs if that is rate limited. FUEL/USD and
-   PAMP/USD from DexScreener once the tokens exist. All keyless and cross-origin; any failure
-   just leaves the dollar lines blank. */
+   PLS/USD straight from PulseX: WPLS against the dollar stablecoins bridged from Ethereum (DAI,
+   USDC, USDT) in their PulseX V1 and V2 pools, weighted by depth (all the dollars over all the
+   PLS in those pools). The forked pDAI is not a dollar and is left out. Only if the chain cannot
+   be read: DexScreener's WPLS pairs, then CoinGecko. FUEL/USD and PAMP/USD from DexScreener once
+   the tokens exist. Any failure just leaves the dollar lines blank. */
+const PLS_USD_POOLS = [            // [PulseX pair, its stablecoin, the stablecoin's decimals]
+  ["0xE56043671df55dE5CDf8459710433C10324DE0aE", "0xefD766cCb38EaF1dfd701853BFCe31359239F305", 18],  // V1 WPLS / DAI from Ethereum
+  ["0x146E1f1e060e5b5016Db0D118D2C5a11A240ae32", "0xefD766cCb38EaF1dfd701853BFCe31359239F305", 18],  // V2 WPLS / DAI from Ethereum
+  ["0x6753560538ECa67617A9Ce605178F788bE7E524E", "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07", 6],   // V1 USDC from Ethereum / WPLS
+  ["0x8eBe62D5e9D26b637673d91f56900233d6A4910d", "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07", 6],   // V2 USDC from Ethereum / WPLS
+  ["0x322Df7921F28F1146Cdf62aFdaC0D6bC0Ab80711", "0x0Cb6F5a34ad42ec934882A05265A7d5F59b51A2f", 6],   // V1 USDT from Ethereum / WPLS
+  ["0x21e4d9dfB30B097316De38ea49c68776C9735329", "0x0Cb6F5a34ad42ec934882A05265A7d5F59b51A2f", 6]    // V2 USDT from Ethereum / WPLS
+];
+const PX_PAIR = new E.Interface(["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+                                 "function token0() view returns (address)"]);
+const MIN_POOL_USD = 1000;         // a pool thinner than this is skipped: too easy to push around
+async function plsFromPulseX() {
+  const r = await mc(PLS_USD_POOLS.flatMap(([pair]) => [call(pair, PX_PAIR, "getReserves"), call(pair, PX_PAIR, "token0")]));
+  let dollars = 0, plsIn = 0;
+  PLS_USD_POOLS.forEach(([, stable, decimals], i) => {
+    const res = dec(PX_PAIR, "getReserves", r[2 * i]), t0 = dec(PX_PAIR, "token0", r[2 * i + 1]);
+    if (!res || !t0) return;
+    const stableFirst = String(t0).toLowerCase() === stable.toLowerCase();
+    const usd = Number(E.formatUnits(stableFirst ? res[0] : res[1], decimals));
+    const wpls = Number(E.formatEther(stableFirst ? res[1] : res[0]));
+    if (usd < MIN_POOL_USD || !(wpls > 0)) return;
+    dollars += usd; plsIn += wpls;
+  });
+  return plsIn > 0 ? dollars / plsIn : null;
+}
 async function fetchPrices() {
   let changed = false;
   const deepest = pairs => pairs.sort((a, b) => (Number(b.liquidity?.usd) || 0) - (Number(a.liquidity?.usd) || 0))[0];
@@ -2913,11 +2940,14 @@ async function fetchPrices() {
   };
 
   let pls = null;
-  try {
-    const j = await (await fetch("https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd", { cache: "no-store" })).json();
-    pls = Number(j?.pulsechain?.usd) || null;
-  } catch {}
+  try { pls = await plsFromPulseX(); } catch {}
   if (!pls) { try { const p = deepest(await dsToken(A.wpls)); pls = p ? Number(p.priceUsd) : null; } catch {} }
+  if (!pls) {
+    try {
+      const j = await (await fetch("https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd", { cache: "no-store" })).json();
+      pls = Number(j?.pulsechain?.usd) || null;
+    } catch {}
+  }
   if (pls && pls !== S.usd.pls) { S.usd.pls = pls; changed = true; }
 
   let fuel = null;
